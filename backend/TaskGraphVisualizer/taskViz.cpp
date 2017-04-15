@@ -158,8 +158,10 @@ int main(int argc, char const *argv[])
     else if (dataArrowsEnabled)
     {
         // Create additional edges for communication
-        close_ct_file(taskGraphIn);
-        taskGraphIn = create_ct_file_r(argv[1]);
+        //close_ct_file(taskGraphIn);
+        fclose(taskGraphIn);
+        //taskGraphIn = create_ct_file_r(argv[1]);
+        taskGraphIn  = fopen(argv[1], "rb");
         CommTracker* tracker = CommTracker::fromFile(taskGraphIn);
         set< pair<TaskId, TaskId> > commEdgeSet;
         for (CommRecord r : tracker->getRecords())
