@@ -16,6 +16,8 @@ Simulator::Simulator(char* f, protocolType protocol){
 	// assign the very first task to processor
 	Task* firstTask = tg -> getNextTask();
 	unsigned cid = (uint32_t)(firstTask -> getContextId());
+	// mod cid 
+	cid = cid % numContexts;
 	contexts[cid].addToTaskQueue(firstTask);
 
 }
@@ -58,6 +60,7 @@ void Simulator::run(){
 							// assign it to the corresponding context
 							Task* newTask = TaskGraph::getTaskById(successorTid);
 							unsigned cid = (uint32_t)(newTask -> getContextId());
+							cid = cid % numContexts;
 							contexts[cid].addToTaskQueue(newTask);
 							// iterate through predecessor set and
 							// decrement child count for all its predecessors
