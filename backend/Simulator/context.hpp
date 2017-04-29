@@ -26,6 +26,9 @@ private:
 
 	std::queue<Task*> taskQueue;
 	std::vector<Task*> completedTasks;
+
+	std::queue<Message> cacheMsgQueue;
+
 	bool successfulMemOp;
 
    	MemOp currentMemOp;
@@ -47,6 +50,9 @@ public:
 
 	bool getSuccessful();
 	void setSuccessful(bool isSuccessful);
+
+	void addCacheMsg(Message msg);
+	vector<Message>& getCacheMsgQueue();
 };
 
 
