@@ -10,7 +10,7 @@
 
 struct MemOp
 {
-	uint64 address;
+	uint64_t addr;
 	action_type actionType;
 };
 
@@ -18,16 +18,18 @@ struct MemOp
 class Context {
 
 private:
-	int contextID;
+	int contextId;
 	Processor* processor;
 	ProtocolHandler* pH;
 	Directory* dir;
 	Cache* cache;  
+	Simulator* simulator;
 
 	std::queue<Task*> taskQueue;
 	std::vector<Task*> completedTasks;
 
-	std::queue<Message> cacheMsgQueue;
+	std::queue<Message*> cacheMsgQueue;
+	std::queue<Message*> incomingMsgQueue;
 
 	bool successfulMemOp;
 
@@ -35,27 +37,31 @@ private:
    	bool currentMemOpSuccessful;
 
 public:
-	Context(int _contextID, protocolType _protocol);
+	Context(int contextId, protocolType protocol, Simulator* simulator);
 	void run();
 
-	void addToTaskQueue(Task* _task);
+	void addToTaskQueue(Task* task);
 	Task* getNextTask(); // return NULL if empty
 
-	void setMemOp(uint64 _addr, action_type _type);
+	void setMemOp(uint64 addr, action_type type);
 	MemOp getMemOp();
 
-	void addCompletedTask(Task* _task);
+	void addCompletedTask(Task* task);
 	vector<Task*>& getCompletedTasks();
 	void clearCompletedTasks();
 
 	bool getSuccessful();
 	void setSuccessful(bool isSuccessful);
 
-	void addCacheMsg(Message* msg);
-	vector<Message>& getCacheMsgQueue();
+	void addToCacheMsgQueue(Message* msg);
+	std::queue<Message*>& getCacheMsgQueue();
 
 	void addToIncomingMsgQueue(Message* msg);
 	std::queue<Message*>& getIncomingMsgQueue();
+
+	int getContextId();
+	int getHomeNodeIdByAddr(uint64_t addr);
+	Context* getContextById(int id);
 };
 
 

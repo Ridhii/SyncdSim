@@ -3,14 +3,13 @@
 
 #include "common.hpp"
 #include "context.hpp"
+#include "message.hpp"
 #include <queue>
 
 class protocolHandler
 {
 private:
 	Context* myContext;
-	std::queue<
-
 
 public:
 	protocolHandler(Context* context);

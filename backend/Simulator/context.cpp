@@ -1,9 +1,9 @@
 #include "context.hpp"
 
 
-Context::Context(int _contextID, protocolType _protocol){
-	contextID = _contextID;
-
+Context::Context(int _contextId, protocolType _protocol, Simulator* _simulator){
+	contextId = _contextId;
+	simulator = _simulator;
 	// create protocolHandler object based on the protocol
 	switch(_protocol) {
     case MSI: 
@@ -42,17 +42,17 @@ Task* Context::getNextTask(){
 	return nextTask;
 }
 
-void Context::setMemOp(uint64 _addr, action_type _type) {
-	currentMemOp.address = _addr;
-	currentMemOp.action_type = _type;
+void Context::setMemOp(uint64 addr, action_type type) {
+	currentMemOp.addr = addr;
+	currentMemOp.action_type = type;
 }
 
 MemOp& Context::getMemOp() {
 	return currentMemOp;
 }
 
-void Context::addCompletedTask(Task* _task) {
-	completedTasks.emplace_back(_task);
+void Context::addCompletedTask(Task* task) {
+	completedTasks.emplace_back(task);
 }
 
 vector<Task*>& Context::getCompletedTasks() {
@@ -71,21 +71,33 @@ bool Context::getSuccessful() {
 	return currentMemOpSuccessful;
 }
 
-void addCacheMsg(Message* msg) {
+void Context::addToCacheMsgQueue(Message* msg) {
 	cacheMsgQueue.emplace_back(msg);
 }
 
-vector<Message>& getCacheMsgQueue() {
+vector<Message*>& Context::getCacheMsgQueue() {
 	return cacheMsgQueue;
 }
 
-void addToIncomingMsgQueue(Message* msg) {
+void Context::addToIncomingMsgQueue(Message* msg) {
 	incomingMsgQueue.emplace_back(msg);
 }
 
-vector<Message>& getIncomingMsgQueue() {
+vector<Message*>& Context::getIncomingMsgQueue() {
 	return incomingMsgQueue;
 }
 
+int Context::getContextId() {
+	return contextId;
+}
+
+int Context::getHomeNodeIdByAddr(uint64_t addr) {
+	// TODO!!!
+	return -1;
+}
+
+Context* Context::getContextById(int id) {
+	return simulator -> getContextById(id);
+}
 
 
