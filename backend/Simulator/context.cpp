@@ -71,10 +71,21 @@ bool Context::getSuccessful() {
 	return currentMemOpSuccessful;
 }
 
+void addCacheMsg(Message* msg) {
+	cacheMsgQueue.emplace_back(msg);
+}
 
+vector<Message>& getCacheMsgQueue() {
+	return cacheMsgQueue;
+}
 
+void addToIncomingMsgQueue(Message* msg) {
+	incomingMsgQueue.emplace_back(msg);
+}
 
-
+vector<Message>& getIncomingMsgQueue() {
+	return incomingMsgQueue;
+}
 
 
 

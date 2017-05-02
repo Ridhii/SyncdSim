@@ -10,10 +10,14 @@
 #include <limits.h>
 #include <Action.hpp>
 
+#include "common.h"
+#include "context.hpp"
+
 
 typedef struct
 {
-	int valid;
+	bool valid;
+	bool dirty;
 	char *tag;
 	int lru_counter;
 } cache_line;
@@ -33,23 +37,17 @@ private:
 
 	int global_counter = 0;
 
+	Context* myContext;
+
+	cache_line& getLine(uint64_t addr);
+	void readLine(uint64_t addr);
+	void invalidateLine(uint64_t addr);
+	void fetchLine(uint64_t addr);
+	void updateLine(uint64_t addr, uint64_t* evictionAddr);
+
 
 public:
-	Cache(int _s, int _E, int _b);
-	// put msg on incomingMsgQueue with type 
-	// CACHE_READ_HIT, CACHE_READ_MISS, CACHE_WRITE_HIT, CACHE_WRITE_MISS
-	void checkLine(unint64 addr, action_type type); 
-
-	//	if read:
-	//		if no eviction -- reply with updateLineAck
-	//		if eviction -- reply with two messages (eviction and Ack)
-	// if write:
-	// 
-	void updateLine(unint64 addr, action_type type);
-
-	// subtract 1 from all cache messages 
-	// check if any has reached 0
-	// call checkLine or updateLine and compose responses
+	Cache(int _s, int _E, int _b, Context* context);
 	void run();
 	void printSummary();
 

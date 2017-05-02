@@ -51,8 +51,11 @@ public:
 	bool getSuccessful();
 	void setSuccessful(bool isSuccessful);
 
-	void addCacheMsg(Message msg);
+	void addCacheMsg(Message* msg);
 	vector<Message>& getCacheMsgQueue();
+
+	void addToIncomingMsgQueue(Message* msg);
+	std::queue<Message*>& getIncomingMsgQueue();
 };
 
 
