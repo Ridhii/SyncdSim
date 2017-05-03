@@ -26,7 +26,7 @@ private:
 	int numContexts;
 	int numUnfinishedTasks;
 	protocolType protocol;
-	std::vector<Context> contexts; 
+	std::vector<Context*> contexts; 
 	std::map <TaskId, unsigned int> completedPredecessors;
 	std::map <TaskId, PendingTaskStatus> pendingSuccessors;
 
@@ -37,6 +37,7 @@ public:
 	Simulator(char* f, protocolType protocol);
 	void run();
 	void printResult();
+	Context* getContextById(int id);
 
 };
 

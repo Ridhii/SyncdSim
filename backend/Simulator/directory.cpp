@@ -3,7 +3,7 @@
 
 Directory::Direcotry(Context* context) {
 	myContext = context;
-	// TODO - initialize the directory data structure
+	
 }
 
 Directory::~Direcotry() {}

@@ -21,8 +21,7 @@ class Direcotry
 {
 private:
 	Context* myContext;
-
-	// TODO - need some data structures
+	int numContexts;
 
 public:
 	Direcotry(Context* context);
