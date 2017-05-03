@@ -1,8 +1,10 @@
 #include "context.hpp"
 
 
-Context::Context(int _contextID, protocolType _protocol){
+Context::Context(int _contextID, protocolType _protocol, int _numContexts){
+	
 	contextID = _contextID;
+	numContexts = _numContexts;
 
 	// create protocolHandler object based on the protocol
 	switch(_protocol) {
@@ -71,6 +73,10 @@ bool Context::getSuccessful() {
 	return currentMemOpSuccessful;
 }
 
+int Context::getNumContexts(){
+	return numContexts;
+}
+
 void addCacheMsg(Message* msg) {
 	cacheMsgQueue.emplace_back(msg);
 }
@@ -86,6 +92,7 @@ void addToIncomingMsgQueue(Message* msg) {
 vector<Message>& getIncomingMsgQueue() {
 	return incomingMsgQueue;
 }
+
 
 
 

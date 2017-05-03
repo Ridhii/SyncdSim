@@ -19,6 +19,7 @@ class Context {
 
 private:
 	int contextID;
+	int numContexts;
 	Processor* processor;
 	ProtocolHandler* pH;
 	Directory* dir;
@@ -35,7 +36,7 @@ private:
    	bool currentMemOpSuccessful;
 
 public:
-	Context(int _contextID, protocolType _protocol);
+	Context(int _contextID, protocolType _protocol, int _numContexts);
 	void run();
 
 	void addToTaskQueue(Task* _task);
@@ -50,6 +51,8 @@ public:
 
 	bool getSuccessful();
 	void setSuccessful(bool isSuccessful);
+
+	int getNumContexts();
 
 	void addCacheMsg(Message* msg);
 	vector<Message>& getCacheMsgQueue();

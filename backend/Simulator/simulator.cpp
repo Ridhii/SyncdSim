@@ -10,7 +10,7 @@ Simulator::Simulator(char* f, protocolType protocol){
 
 	// initialize contexts
 	for (int i = 0; i < numContexts; ++i){
-		contexts.emplace_back(Context(i, protocol));
+		contexts.emplace_back(Context(i, protocol, numContexts));
 	}
 
 	// assign the very first task to processor
