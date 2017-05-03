@@ -38,6 +38,7 @@ public:
 	void run();
 	void printResult();
 	Context* getContextById(int id);
+	int getNumContexts();
 
 };
 
