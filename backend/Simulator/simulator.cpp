@@ -10,7 +10,7 @@ Simulator::Simulator(char* f, protocolType protocol){
 
 	// initialize contexts
 	for (int i = 0; i < numContexts; ++i){
-		contexts.emplace_back(new Context(i, protocol));
+		contexts.emplace_back(new Context(i, protocol, this));
 	}
 
 	// assign the very first task to processor
@@ -79,6 +79,10 @@ void Simulator::run(){
 
 void Simulator::printResult(){
 	printf("Simulation is completed\n");
+}
+
+int Simulator::getNumContexts() {
+	return numContexts;
 }
 
 Context* Simulator::getContextById(int id) {
