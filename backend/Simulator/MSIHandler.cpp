@@ -25,11 +25,9 @@ void MSIHandler::handleMemOpRequest() {
 		*  send a WRITE_MISS message to home node
 		*  expect a DATA_VALUE_REPLY from home node
 		*/
-		if (cacheLineStatus.find(addr) == cacheLineStatus.end()) {
-			Message* outMsg = new Message(
-				myId, addr, MsgType.WRITE_MISS, nodeLatency);
+		if (cacheLineStatus.find(addr) == cacheLineStatus.end()) {			
 			int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
-			(context -> getContextById(homeNodeId)) -> addToIncomingMsgQueue(outMsg);
+			sendMsgToNode(homeNodeId, addr, MsgType.WRITE_MISS)
 		}
 		/* 
 		*  line found in SHARED state
@@ -37,10 +35,8 @@ void MSIHandler::handleMemOpRequest() {
 		*  expect a INVALIDATE_ACK from home node
 		*/
 		else if (cacheLineStatus[addr].MSIStatus == MSIStatus.SHARED) {
-			Message* outMsg = new Message(
-				myId, addr, MsgType.INVALIDATE, nodeLatency);
 			int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
-			(context -> getContextById(homeNodeId)) -> addToIncomingMsgQueue(outMsg);
+			sendMsgToNode(homeNodeId, addr, MsgType.INVALIDATE)
 		}
 		/* 
 		*  line found in MODIFIED state
@@ -63,10 +59,8 @@ void MSIHandler::handleMemOpRequest() {
 		*  expect a DATA_VALUE_REPLY from home node
 		*/
 		if (cacheLineStatus.find(addr) == cacheLineStatus.end()) {
-			Message* outMsg = new Message(
-				myId, addr, MsgType.READ_MISS, nodeLatency);
 			int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
-			(context -> getContextById(homeNodeId)) -> addToIncomingMsgQueue(outMsg);
+			sendMsgToNode(homeNodeId, addr, MsgType.READ_MISS)
 		}
 		/*
 		* line found in either SHARED or MODIFIED state
@@ -87,7 +81,7 @@ void MSIHandler::handleMemOpRequest() {
 void sendMsgToNode(int dstId, uint64_t addr, MessageType msgType) {
 	int myId = myContext -> getContextId();
 	Message* outMsg = new Message(
-	 					myId, addr, MessageType.DATA_VALUE_REPLY, nodeLatency);
+	 					myId, addr, msgType, nodeLatency);
 	Context* dstContext = getContextById(dstId);
 	dstContext -> addToIncomingMsgQueue(outMsg);
 }
@@ -96,7 +90,7 @@ void sendMsgToNode(int dstId, uint64_t addr, MessageType msgType) {
 void sendMsgToCache(uint64_t addr, MessageType msgType) {
 	int myId = myContext -> getContextId();
 	Message* outMsg = new Message(
-						myId, addr, MessageType.CACHE_INVALIDATE, cacheLatency);
+						myId, addr, msgType, cacheLatency);
 	myContext -> addToCacheMsgQueue(outMsg);
 }
 
@@ -115,7 +109,23 @@ void addToBlockedMsgMap(Message* msg) {
 	}
 }
 
-
+void checkBlockedQueueAtAddress(uint64_t addr) {
+	Message* m;
+	while (!blockedMsgMap[addr].empty()) {
+	 	m = blockedMsgMap[addr].top();
+	 	if (handleMessage(m)) { // not blocked
+	 		blockedMsgMap[addr].pop();
+	 	}	
+	 	else { // message blocked again, rest of the queue remain blocked
+	 		break;
+	 	}
+	}	
+	
+	// if queue becomes empty, remove it from map
+	if (blockedMsgMap[addr].empty()) {
+	 	blockedMsgMap.erase(addr);
+	}
+}
 
 bool MSIHandler::handleMessage(Message* msg) {
 
@@ -219,7 +229,9 @@ bool MSIHandler::handleMessage(Message* msg) {
 		 					sendMsgToNode(srcId, addr, MessageType.INVALIDATE_ACK);
 		 				}
 		 				else { 
-		 				// needs to ask cache to invalidate the line
+		 				// needs to ask cache to invalidate the line and 
+		 				// remove the entry from cacheLineStatus to indicate an INVALID status
+		 					cacheLineStatus.erase(addr);
 		 					sendMsgToCache(addr, MessageType.CACHE_INVALIDATE);
 		 					return false;
 		 				}
@@ -249,6 +261,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 				if (pendingInvAckCount[addr] == 0) {
 	 					pendingInvAckCount.erase[addr];
 	 					Message* m = blockedMsgMap[addr].top();
+	 					blockedMsgMap[addr].pop();
 	 					int srcId = m -> sourceID;
 	 					myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus.MODIFIED, srcId);
 
@@ -262,31 +275,19 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 					else {
 	 						// Shouldn't reach here!
 	 					}
-	 					while (!blockedMsgMap[addr].empty()) {
-	 						m = blockedMsgMap[addr].top();
-	 						if (handleMessage(m)) { // not blocked
-	 							blockedMsgMap[addr].pop();
-	 						}	
-	 						else { // message blocked again, rest of the queue remain blocked
-	 							break;
-	 						}
-	 					}	
-	 					// if queue becomes empty, remove it from map
-	 					if (blockedMsgMap[addr].empty()) {
-	 						blockedMsgMap.erase(addr);
-	 					}
+	 					checkBlockedQueueAtAddress(addr);
 	 				}
 	 			}
 	 			/* 
 	 			 * if I am not the home node, this ACK must be from the home node 
 	 			 * telling me that I can proceed to writing the line
-	 			 * modify my cache and cacheLineStatus
-	 			 * set successful to true so that processor can take the next memop request
+	 			 * modify cacheLineStatus and send cache an UPDATE message 
+	 			 * 
+	 			 * Note that we'll wait for CACHE_UPDATE_ACK to set successful to true
 				*/
 	 			else {
 	 				cacheLineStatus[addr] = MSIStatus.MODIFIED;
 	 				sendMsgToCache(addr, MessageType.CACHE_UPDATE);
-	 				myContext -> setSuccessful(true);
 	 			}
 	 			break;
 
@@ -294,12 +295,14 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 		case FETCH:
 				cacheLineStatus[addr] = MSIStatus.SHARED;
 	 			sendMsgToCache(addr, MessageType.CACHE_FETCH);
+	 			return false;
 	 			break;
 
 	 		//=============================== FETCH_INV ===============================
 	 		case FETCH_INVALIDATE:
-	 			cacheLineStatus[addr] = MSIStatus.INVALID;
+	 			cacheLineStatus.erase(addr);
 	 			sendMsgToCache(addr, MessageType.CACHE_INVALIDATE);
+	 			return false;
 	 			break;
 
 	 		//=============================== DATA_VALUE_REPLY ===============================
@@ -334,6 +337,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 			myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus.UNCACHED, srcId);
 	 			if (blockedMsgMap.find(addr) != blockedMsgMap.end()) {
 	 				Message* m = blockedMsgMap[addr].top();
+	 				blockedMsgMap[addr].pop();
 	 				int srcId = m -> sourceID;
 
 	 				// assert - must be either WRITE_MISS or READ_MISS
@@ -348,28 +352,91 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 				else {
 	 					// Shouldn't reach here!
 	 				}
-	 				while (!blockedMsgMap[addr].empty()) {
-	 					m = blockedMsgMap[addr].top();
-	 					if (handleMessage(m)) { // not blocked
-	 						blockedMsgMap[addr].pop();
-	 					}	
-	 					else { // message blocked again, rest of the queue remain blocked
-	 						break;
-	 					}
-	 				}	
+	 				checkBlockedQueueAtAddress(addr);
 	 			}
 	 			break;
 
 
 	 		//=============================== CACHE_READ_REPLY ===============================	
 	 		case CACHE_READ_REPLY:
+	 			/* Must be a reply to my own memOp, which is a action_type_read 
+	 			 * set successful to 1 so that processor can proceed to next mem op
+	 			 */
+	 			myContext -> setSuccessful(true);
 	 			break;
+
+	 		//=============================== CACHE_READ_REPLY ===============================	
 	 		case CACHE_UPDATE_ACK:
+	 			/*
+	 			* Indicates a successful write 
+	 			* The address must match the addr of current mem op
+	 			* we can now set successful to true so that processor can proceed
+	 			*
+	 			* Note that cacheLineStatus is already updated
+	 			*/
+
+	 			MemOp currOp = myContext -> getMemOp();
+	 			uint64_t opAddr = currOp -> addr;
+	 			// assert that the addr matches opAddr
+	 			myContext -> setSuccessful(true);
 	 			break;
+
+	 		//=============================== CACHE_READ_REPLY ===============================	
 	 		case CACHE_INVALIDATE_ACK:
+	 			/*  
+	 			* The first message of the blocked queue must be either an 
+	 			* INVALIDATE or FETCH_INVALIDATE. We can now reply to it.
+	 			* 
+	 			* Note that cacheLineStatus is already updated
+	 			*/
+
+	 			Message* m = blockedMsgMap[addr].top();
+	 			blockedMsgMap[addr].pop();
+	 			int srcId = m -> sourceID;
+
+	 			// assert - must be either INVALIDATE or FETCH_INVALIDATE
+	 			if (m -> msgType == msgType.INVALIDATE) {
+	 				sendMsgToNode(srcId, addr, MessageType.INVALIDATE_ACK);	 					
+	 			} 
+	 			else if (m -> msgType == msgType.FETCH_INVALIDATE) {
+	 				sendMsgToNode(srcId, addr, MessageType.DATA_WRITE_BACK);	 					
+	 			}
+	 			else {
+	 				// Shouldn't reach here!
+	 			}
+	 			checkBlockedQueueAtAddress(addr);
 	 			break;
+
+	 		//=============================== CACHE_FETCH_ACK ===============================	
+	 		case CACHE_FETCH_ACK:
+	 			/* 
+	 			 * The first blocked message must be a FETCH. We can now reply to it.
+	 			 *
+	 			 * Note taht cacheLineStatus is already updated 
+	 			 */
+	 			Message* m = blockedMsgMap[addr].top();
+	 			blockedMsgMap[addr].pop();
+	 			int srcId = m -> sourceID;
+
+	 			// assert - must be FETCH
+	 			sendMsgToNode(srcId, addr, MessageType.DATA_WRITE_BACK);	 
+	 			checkBlockedQueueAtAddress(addr);					
+	 			break;
+
+	 		//=============================== CACHE_EVICTION_ALERT ===============================	
 	 		case CACHE_EVICTION_ALERT:
+	 			/*
+	 			* if cacheLineStatus was MODIFIED, need to notify the home node
+	 			* change cacheLineStatus to be INVALID by removing the entry
+	 			*/
+	 			if (cacheLineStatus[addr].status == MSIStatus.MODIFIED) {
+					int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
+					sendMsgToNode(homeNodeId, addr, MsgType.DATA_WRITE_BACK)
+	 			}
+	 			cacheLineStatus.erase(addr);
+
 	 			break;
+
 	 		default: // UNRECOGNIZED MESSAGE TYPE
 	 			break;
 
