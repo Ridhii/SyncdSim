@@ -1,11 +1,6 @@
 #ifndef DIRECTORY_H
 #define DIRECTORY_H
 
-#include "common.hpp"
-#include "context.hpp"
-#include <map>
-
-
 enum DirectoryEntryStatus {UNCACHED, SHARED, MODIFIED}  // by other processors
 
 struct DirectoryEntry
