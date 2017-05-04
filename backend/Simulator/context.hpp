@@ -21,7 +21,7 @@ private:
 	int contextId;
 	Processor* processor;
 	ProtocolHandler* pH;
-	Directory* dir;
+	Directory* directory;
 	Cache* cache;  
 	Simulator* simulator;
 
@@ -30,6 +30,7 @@ private:
 
 	std::queue<Message*> cacheMsgQueue;
 	std::queue<Message*> incomingMsgQueue;
+	std::map<uint64_t, std::queue<Message*> > blockedMsgMap;
 
 	bool successfulMemOp;
 
@@ -61,9 +62,15 @@ public:
 	void addToIncomingMsgQueue(Message* msg);
 	std::queue<Message*>& getIncomingMsgQueue();
 
+	std::map<uint64_t, std::queue<Message*> >& getBlockedMsgMap();
+
+	DirectoryEntry lookupDirectoryEntry(uint64_t addr);
+	void updateDirectoryEntry(uint64_t addr, DirectoryEntryStatus status, int pid);
+
 	int getContextId();
 	int getHomeNodeIdByAddr(uint64_t addr);
 	Context* getContextById(int id);
+	int getNumContexts();
 };
 
 
