@@ -26,7 +26,7 @@ Context::Context(int _contextId, protocolType _protocol, Simulator* _simulator){
 
 
 void Context::run(){
-      pH -> checkIncomingMsgs();
+      pH -> checkIncomingMsgQueue();
       processor -> run();
 }
 
@@ -99,5 +99,27 @@ int Context::getHomeNodeIdByAddr(uint64_t addr) {
 Context* Context::getContextById(int id) {
 	return simulator -> getContextById(id);
 }
+
+std::map<uint64_t, std::queue<Message*> >& Context::getBlockedMsgMap() {
+	return blockedMsgMap;
+}
+
+int Context::getNumContexts() {
+	return simulator -> getNumContexts();
+}
+
+DirectoryEntry Context::lookupDirectoryEntry(uint64_t addr) {
+	return directory -> lookupEntry(uint64_t);
+}
+
+void Context::updateDirectoryEntry(uint64_t addr, DirectoryEntryStatus status, int pid) {
+	directory -> updateEntry(addr, status, pid);
+}
+
+
+
+
+
+
 
 
