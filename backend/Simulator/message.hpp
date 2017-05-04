@@ -13,8 +13,13 @@ enum MessageType {CACHE_READ,
 	              	CACHE_EVICTION_ALERT,
 	              	WRITE_MISS, 
 	              	READ_MISS, 
+	              	INVALIDATE,
+	              	INVALIDATE_ACK,
+	              	FETCH,
+	              	FETCH_INVALIDATE,
 	              	DATA_VALUE_REPLY,
-	              	INVALIDATE};
+	              	DATA_WRITE_BACK
+	              	};
 struct Message{
     
     /* the ID of the sender */
@@ -22,7 +27,7 @@ struct Message{
 	uint64_t addr;
 	MessageType msgType;
 	/* latency of communication */
-	uint latency;
+	unsigned latency;
 
 };
 
