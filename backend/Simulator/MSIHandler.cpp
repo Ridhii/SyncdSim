@@ -240,39 +240,41 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 			 * decrement the count from pendingInvAckCount
 	 			 * if reaches 0, 
 	 			 * remove entry from pendingInvAckCount
-	 			 * unblock the first message in blockedMap for this line and service it
-	 			 * modify directory status accordingly
-	 			 * move blocked queue to front of incoming queue and remove this map entry
+	 			 * modify directory status accordingly (by making the original requester an exclusive)
+	 			 * service the first message from the blocked queue
+	 			 * try to go down the queue until blocked again
 				*/
 	 			if (homeId == myId) {
 	 				pendingInvAckCount[addr]--;
 	 				if (pendingInvAckCount[addr] == 0) {
 	 					pendingInvAckCount.erase[addr];
-	 					Message* msg = blockedMsgMap[addr].top();
-	 					blockedMsgMap[addr].pop();
-	 					int srcId = msg -> sourceID;
+	 					Message* m = blockedMsgMap[addr].top();
+	 					int srcId = m -> sourceID;
+	 					myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus.MODIFIED, srcId);
+
 	 					// assert - must be either WRITE_MISS or INVALIDATE
-	 					if (msg -> msgType == msgType.WRITE_MISS) {
+	 					if (m -> msgType == msgType.WRITE_MISS) {
 	 						sendMsgToNode(srcId, addr, MessageType.DATA_VALUE_REPLY);	 					
-	 						myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus.MODIFIED, srcId);
 	 					} 
-	 					else if (msg -> msgType == msgType.INVALIDATE) {
+	 					else if (m -> msgType == msgType.INVALIDATE) {
 	 						sendMsgToNode(srcId, addr, MessageType.INVALIDATE_ACK);	 					
-	 						myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus.MODIFIED, srcId);
 	 					}
 	 					else {
-	 						// ERROR!
+	 						// Shouldn't reach here!
 	 					}
 	 					while (!blockedMsgMap[addr].empty()) {
-	 						Message* msg = blockedMsgMap[addr].top();
-	 						if (handleMessage(msg)) { // not blocked
+	 						m = blockedMsgMap[addr].top();
+	 						if (handleMessage(m)) { // not blocked
 	 							blockedMsgMap[addr].pop();
-	 							continue;
 	 						}	
-	 						else { // message blocked again, then the rest of the blocked queue remain
+	 						else { // message blocked again, rest of the queue remain blocked
 	 							break;
 	 						}
 	 					}	
+	 					// if queue becomes empty, remove it from map
+	 					if (blockedMsgMap[addr].empty()) {
+	 						blockedMsgMap.erase(addr);
+	 					}
 	 				}
 	 			}
 	 			/* 
@@ -283,7 +285,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 				*/
 	 			else {
 	 				cacheLineStatus[addr] = MSIStatus.MODIFIED;
-	 				sendMsgToCache(addr, Message.CACHE_UPDATE);
+	 				sendMsgToCache(addr, MessageType.CACHE_UPDATE);
 	 				myContext -> setSuccessful(true);
 	 			}
 	 			break;
@@ -291,25 +293,75 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 		//=============================== FETCH ===============================
 	 		case FETCH:
 				cacheLineStatus[addr] = MSIStatus.SHARED;
-	 			sendMsgToCache(addr, Message.CACHE_FETCH);
+	 			sendMsgToCache(addr, MessageType.CACHE_FETCH);
 	 			break;
 
 	 		//=============================== FETCH_INV ===============================
 	 		case FETCH_INVALIDATE:
 	 			cacheLineStatus[addr] = MSIStatus.INVALID;
-	 			sendMsgToCache(addr, Message.CACHE_INVALIDATE);
+	 			sendMsgToCache(addr, MessageType.CACHE_INVALIDATE);
 	 			break;
 
 	 		//=============================== DATA_VALUE_REPLY ===============================
 	 		case DATA_VALUE_REPLY:
-	 			// you must be the requesting node and successful must be 0 right now
-		// send an UPDATE_LINE to cache and wait for UPDATE_LINE_ACK
-		// satisfy the curr request and set successful = 1
-		
+	 			/*
+	 			 * This must be a response for a previous message (either READ_MISS or 
+	 			 * WRITE_MISS) we send out to home node
+	 			 * change cacheLineStatus[addr]
+	 			 * tell local cache to update the line
+				*/
+	 			// TODO : assert successful to be 0
+	 			MemOp currOp = myContext -> getMemOp();
+	 			// if a WRITE_MISS
+				if (currOp.actionType = action_type.action_type_write) {
+					cacheLineStatus[addr] = MSIStatus.MODIFIED;
+				}
+				else { // if a READ_MISS
+					cacheLineStatus[addr] = MSIStatus.SHARED;
+				}
+				sendMsgToCache(addr, MessageType.CACHE_UPDATE);
+	 			break;
 
-	 			break;
+	 		//=============================== DATA_WRITE_BACK ===============================
 	 		case DATA_WRITE_BACK:
+	 			/*
+				* We are the home node of the line
+				* This must be from exclusive owner, either replying to a FETCH/FETCH_INVALIDATE
+				* we sent earlier, or notifying me about eviction
+				*
+				* Either way, we update directory entry and check the blocked queue for the line
+	 			*/
+	 			myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus.UNCACHED, srcId);
+	 			if (blockedMsgMap.find(addr) != blockedMsgMap.end()) {
+	 				Message* m = blockedMsgMap[addr].top();
+	 				int srcId = m -> sourceID;
+
+	 				// assert - must be either WRITE_MISS or READ_MISS
+	 				if (m -> msgType == msgType.WRITE_MISS) {
+	 					sendMsgToNode(srcId, addr, MessageType.DATA_VALUE_REPLY);
+	 					myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus.MODIFIED, srcId);
+	 				} 
+	 				else if (m -> msgType == msgType.READ_MISS) {
+	 					sendMsgToNode(srcId, addr, MessageType.DATA_VALUE_REPLY);	
+	 		 			myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus.SHARED, srcId); 					
+	 				}
+	 				else {
+	 					// Shouldn't reach here!
+	 				}
+	 				while (!blockedMsgMap[addr].empty()) {
+	 					m = blockedMsgMap[addr].top();
+	 					if (handleMessage(m)) { // not blocked
+	 						blockedMsgMap[addr].pop();
+	 					}	
+	 					else { // message blocked again, rest of the queue remain blocked
+	 						break;
+	 					}
+	 				}	
+	 			}
 	 			break;
+
+
+	 		//=============================== CACHE_READ_REPLY ===============================	
 	 		case CACHE_READ_REPLY:
 	 			break;
 	 		case CACHE_UPDATE_ACK:
@@ -318,7 +370,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 			break;
 	 		case CACHE_EVICTION_ALERT:
 	 			break;
-	 		default: // throw exception
+	 		default: // UNRECOGNIZED MESSAGE TYPE
 	 			break;
 
 	 	}
