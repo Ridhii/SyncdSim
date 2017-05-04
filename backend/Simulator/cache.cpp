@@ -1,5 +1,4 @@
-#ifndef CACHE_HPP
-#define CACHE_HPP
+#include "cache.hpp"
 
 
 
@@ -212,8 +211,5 @@ void Cache::printSummary(long hits, long misses, long evictions)
     fprintf(output_fp, "%ld %ld %ld\n", hits, misses, evictions);
     fclose(output_fp);
 }
-
-
-#endif 
 
 

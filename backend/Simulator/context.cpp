@@ -1,6 +1,5 @@
 #include "context.hpp"
 
-
 Context::Context(int _contextId, protocolType _protocol, Simulator* _simulator){
 	contextId = _contextId;
 	simulator = _simulator;
@@ -31,18 +30,18 @@ void Context::run(){
 }
 
 
-void Context::addToTaskQueue(Task* _task){
-	taskQueue.push(_task);
+void Context::addToTaskQueue(contech::Task* _Task){
+	taskQueue.push(_Task);
 }
 
-Task* Context::getNextTask(){
-	if (taskQueue.empty())	return NULL;
-	Task* nextTask = taskQueue.front();
+contech::Task* Context::getNextTask(){
+	if (contech::TaskQueue.empty())	return NULL;
+	contech::Task* nextTask = taskQueue.front();
 	taskQueue.pop();
 	return nextTask;
 }
 
-void Context::setMemOp(uint64 addr, action_type type) {
+void Context::setMemOp(uint64 addr, contech::action_type type) {
 	currentMemOp.addr = addr;
 	currentMemOp.action_type = type;
 }
@@ -51,11 +50,11 @@ MemOp& Context::getMemOp() {
 	return currentMemOp;
 }
 
-void Context::addCompletedTask(Task* task) {
-	completedTasks.emplace_back(task);
+void Context::addCompletedTask(contech::Task* Task) {
+	completedTasks.emplace_back(Task);
 }
 
-vector<Task*>& Context::getCompletedTasks() {
+vector<contech::Task*>& Context::getCompletedTasks() {
 	return completedTasks;
 }
 

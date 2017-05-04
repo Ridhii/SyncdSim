@@ -2,18 +2,18 @@
 #define PROTOCOL_HANDLER_HPP
 
 #include "common.hpp"
-#include "context.hpp"
-#include "message.hpp"
-#include <queue>
 
-class protocolHandler
+
+
+class Context; 
+class ProtocolHandler
 {
 private:
 	Context* myContext;
 
 public:
-	protocolHandler(Context* context);
-	~protocolHandler();
+	ProtocolHandler(Context* context);
+	~ProtocolHandler();
 	virtual void handleMemOpRequest() = 0;
 	virtual void checkIncomingMsgQueue() = 0;
 

@@ -2,11 +2,6 @@
 #define MSI_HANDLER_HPP
 
 #include "protocolHandler.hpp"
-#include "context.hpp"
-#include "common.hpp"
-#include "directory.hpp"
-#include <map>
-
 
 enum MSIStatus {MODIFIED, SHARED, INVALID};
 

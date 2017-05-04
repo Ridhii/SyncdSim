@@ -1,6 +1,8 @@
 #ifndef MESSAGE_HPP
 #define MESSAGE_HPP
 
+#include <stdint.h>
+
 
 enum MessageType {CACHE_READ, 
 					CACHE_READ_REPLY, 

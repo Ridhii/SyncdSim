@@ -1,17 +1,15 @@
-#include "common.hpp"
-#include "context.hpp"
-#include "assert.h"
-#include <map>
+#include "directory.hpp"
 
 
-Directory::Direcotry(Context* context) {
+
+Directory::Directory(Context* context) {
 	
 	myContext = context;
 	numContexts = myContext->getNumContexts();
 	
 }
 
-Directory::~Direcotry() {}
+Directory::~Directory() {}
 
 DirectoryEntryStatus Directory::lookUpEntry(uint64_t addr) {
 	if(directory.find(addr) == directory.end()){

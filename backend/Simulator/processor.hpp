@@ -1,29 +1,18 @@
-#include "../../common/taskLib/Action.hpp"
-#include "../../common/taskLib/Task.hpp"
-#include "context.hpp"
-#include <queue>
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <sstream>
-#include <assert.h>
-#include <vector>
-#include <map>
-#include <algorithm>
+#ifndef PROCESSOR_HPP
+#define PROCESSOR_HPP
 
 
-#define ALIGNER 0xFFFFFE00
-#define LINE_SIZE 64
-#define ACTION_SIZE 8
-#define POW_SIZE 3
+#include "common.hpp"
 
 
+
+class Context;
 
 class Processor{
 
 private:
-	Task* currTask;
-	std::queue<MemoryAction> memActionQueue;
+	contech::Task* currTask;
+	std::queue<contech::MemoryAction> memActionQueue;
 	Context* myContext;
 
 public:
@@ -33,4 +22,7 @@ public:
 
 
 };
+
+
+#endif
 

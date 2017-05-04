@@ -1,17 +1,7 @@
 #ifndef SIMULATOR_HPP
 #define SIMULATOR_HPP
-
-#include <set>
-
-#include "Task.hpp"
-#include "TaskGraph.hpp"
-
 #include "common.hpp"
-#include "Processor.hpp"
-#include "Directory.hpp"
-#include "Cache.hpp"
-#include "ProtocolHandler.hpp"
-#include "Action.hpp"
+#include "context.hpp"
 
 
 class Simulator {
@@ -19,16 +9,16 @@ private:
 	struct PendingTaskStatus
 	{
 		unsigned count;
-		std::set<TaskId> predecessors;
+		std::set<contech::TaskId> predecessors;
 	};
 
-	TaskGraph* tg;
+	contech::TaskGraph* tg;
 	int numContexts;
 	int numUnfinishedTasks;
 	protocolType protocol;
 	std::vector<Context*> contexts; 
-	std::map <TaskId, unsigned int> completedPredecessors;
-	std::map <TaskId, PendingTaskStatus> pendingSuccessors;
+	std::map <contech::TaskId, unsigned int> completedPredecessors;
+	std::map <contech::TaskId, PendingTaskStatus> pendingSuccessors;
 
 	int cycleCount;
 

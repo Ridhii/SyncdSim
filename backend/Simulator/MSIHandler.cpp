@@ -19,7 +19,7 @@ void MSIHandler::handleMemOpRequest() {
 	uint64_t addr = currOp.addr;
 	int myId = myContext -> getContextId();
 
-	if (currOp.actionType = action_type.action_type_write) {
+	if (currOp.actionType = contech::action_type.contech::action_type_write) {
 		/* 
 		*  line not found in map -- INVALID 
 		*  send a WRITE_MISS message to home node
@@ -313,7 +313,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 			// TODO : assert successful to be 0
 	 			MemOp currOp = myContext -> getMemOp();
 	 			// if a WRITE_MISS
-				if (currOp.actionType = action_type.action_type_write) {
+				if (currOp.actionType = contech::action_type.contech::action_type_write) {
 					cacheLineStatus[addr] = MSIStatus.MODIFIED;
 				}
 				else { // if a READ_MISS

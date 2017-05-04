@@ -17,7 +17,7 @@ void Processor::populateMemActionQueue(){
 	/* only called to populate the memActionQueue with the 
 	   currTask's memOps
 	*/
-	Task::memOpCollection memOps = currTask->getMemOps();
+	contech::Task::memOpCollection memOps = currTask->getMemOps();
 	auto iter = memOps.begin();
 	while (iter != memOps.end()){
         MemoryAction ma = *(iter);

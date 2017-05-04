@@ -1,18 +1,9 @@
 #ifndef CACHE_HPP
 #define CACHE_HPP
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include <getopt.h>
-#include <math.h>
-#include <limits.h>
-#include <Action.hpp>
+#include "common.hpp"
 
-#include "common.h"
-#include "context.hpp"
-
+Class Context;
 
 typedef struct
 {

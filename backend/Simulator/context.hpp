@@ -1,17 +1,19 @@
 #ifndef CONTEXT_HPP
 #define CONTEXT_HPP
 
+#include "common.hpp"
 #include "processor.hpp"
 #include "ProtocolHandler.hpp"
 #include "directory.hpp"
 #include "cache.hpp"
-#include "common.hpp"
-#include "Action.hpp"
+
+
+Class Simulator;
 
 struct MemOp
 {
 	uint64_t addr;
-	action_type actionType;
+	contech::action_type actionType;
 };
 
 
@@ -25,8 +27,8 @@ private:
 	Cache* cache;  
 	Simulator* simulator;
 
-	std::queue<Task*> taskQueue;
-	std::vector<Task*> completedTasks;
+	std::queue<contech::Task*> taskQueue;
+	std::vector<contech::Task*> completedTasks;
 
 	std::queue<Message*> cacheMsgQueue;
 	std::queue<Message*> incomingMsgQueue;
@@ -41,21 +43,20 @@ public:
 	Context(int contextId, protocolType protocol, Simulator* simulator);
 	void run();
 
-	void addToTaskQueue(Task* task);
-	Task* getNextTask(); // return NULL if empty
+	void addToTaskQueue(contech::Task* Task);
+	contech::Task* getNextTask(); // return NULL if empty
 
-	void setMemOp(uint64 addr, action_type type);
+	void setMemOp(uint64_t addr, contech::action_type type);
 	MemOp getMemOp();
 
-	void addCompletedTask(Task* task);
-	vector<Task*>& getCompletedTasks();
+	void addCompletedTask(contech::Task* Task);
+	vector<contech::Task*>& getCompletedTasks();
 	void clearCompletedTasks();
 
 	bool getSuccessful();
 	void setSuccessful(bool isSuccessful);
 
 	void addCacheMsg(Message* msg);
-	vector<Message>& getCacheMsgQueue();
 	void addToCacheMsgQueue(Message* msg);
 	std::queue<Message*>& getCacheMsgQueue();
 
