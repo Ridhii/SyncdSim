@@ -4,11 +4,11 @@
 #include "common.hpp"
 #include "processor.hpp"
 #include "ProtocolHandler.hpp"
+#include "MSIHandler.hpp"
 #include "directory.hpp"
 #include "cache.hpp"
 
-
-Class Simulator;
+class Simulator;
 
 struct MemOp
 {
@@ -30,9 +30,9 @@ private:
 	std::queue<contech::Task*> taskQueue;
 	std::vector<contech::Task*> completedTasks;
 
-	std::queue<Message*> cacheMsgQueue;
-	std::queue<Message*> incomingMsgQueue;
-	std::map<uint64_t, std::queue<Message*> > blockedMsgMap;
+	std::vector<Message*> cacheMsgQueue;
+	std::vector<Message*> incomingMsgQueue;
+	std::map<uint64_t, std::vector<Message*> > blockedMsgMap;
 
 	bool successfulMemOp;
 
@@ -47,7 +47,7 @@ public:
 	contech::Task* getNextTask(); // return NULL if empty
 
 	void setMemOp(uint64_t addr, contech::action_type type);
-	MemOp getMemOp();
+	MemOp& getMemOp();
 
 	void addCompletedTask(contech::Task* Task);
 	vector<contech::Task*>& getCompletedTasks();
@@ -58,20 +58,22 @@ public:
 
 	void addCacheMsg(Message* msg);
 	void addToCacheMsgQueue(Message* msg);
-	std::queue<Message*>& getCacheMsgQueue();
+	std::vector<Message*>& getCacheMsgQueue();
 
 	void addToIncomingMsgQueue(Message* msg);
-	std::queue<Message*>& getIncomingMsgQueue();
+	std::vector<Message*>& getIncomingMsgQueue();
 
-	std::map<uint64_t, std::queue<Message*> >& getBlockedMsgMap();
+	std::map<uint64_t, std::vector<Message*> >& getBlockedMsgMap();
 
-	DirectoryEntry lookupDirectoryEntry(uint64_t addr);
+	DirectoryEntry& lookupDirectoryEntry(uint64_t addr);
 	void updateDirectoryEntry(uint64_t addr, DirectoryEntryStatus status, int pid);
 
 	int getContextId();
 	int getHomeNodeIdByAddr(uint64_t addr);
 	Context* getContextById(int id);
 	int getNumContexts();
+
+	void handleMemOpRequest();
 };
 
 

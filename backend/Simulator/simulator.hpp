@@ -3,12 +3,11 @@
 #include "common.hpp"
 #include "context.hpp"
 
-
 class Simulator {
 private:
 	struct PendingTaskStatus
 	{
-		unsigned count;
+		unsigned long count;
 		std::set<contech::TaskId> predecessors;
 	};
 
@@ -17,7 +16,7 @@ private:
 	int numUnfinishedTasks;
 	protocolType protocol;
 	std::vector<Context*> contexts; 
-	std::map <contech::TaskId, unsigned int> completedPredecessors;
+	std::map <contech::TaskId, unsigned long> completedPredecessors;
 	std::map <contech::TaskId, PendingTaskStatus> pendingSuccessors;
 
 	int cycleCount;

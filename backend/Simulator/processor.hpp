@@ -4,8 +4,6 @@
 
 #include "common.hpp"
 
-
-
 class Context;
 
 class Processor{

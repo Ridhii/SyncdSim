@@ -49,9 +49,8 @@ void Simulator::run(){
 						// the successor hasn't been added
 						else {	
 							// create map entry for this successor
-							contech::Task* newSuccessor = contech::TaskGraph::getTaskById(successorTid);
+							contech::Task* newSuccessor = tg -> getTaskById(successorTid);
 							std::vector<contech::TaskId> preds = newSuccessor -> getPredecessorTasks();
-							PendingTaskStatus s;
 							std::set<contech::TaskId> s(preds.begin(), preds.end());
 							PendingTaskStatus status{preds.size() - 1, s}; // subtract 1 due to the completion of this predecessor
 							pendingSuccessors.insert(std::pair<contech::TaskId, PendingTaskStatus> (successorTid, status));
@@ -60,10 +59,10 @@ void Simulator::run(){
 						// the successor is ready to run since all its predesssors have completed
 						if (pendingSuccessors[successorTid].count == 0){
 							// assign it to the corresponding context
-							contech::Task* newTask = contech::TaskGraph::getTaskById(successorTid);
+							contech::Task* newTask = tg -> getTaskById(successorTid);
 							unsigned cid = (uint32_t)(newTask -> getContextId());
 							cid = cid % numContexts;
-							contexts[cid].addToTaskQueue(newTask);
+							contexts[cid] -> addToTaskQueue(newTask);
 							// iterate through predecessor set and
 							// decrement child count for all its predecessors
 							for(auto pred : pendingSuccessors[successorTid].predecessors) {

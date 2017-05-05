@@ -7,9 +7,6 @@ Processor::Processor(Context* context){
     */
 	myContext = context;
 	currTask  = NULL;
-	memActionQueue = new std::queue<MemoryAction>;
-
-
 }
 
 void Processor::populateMemActionQueue(){
@@ -20,17 +17,17 @@ void Processor::populateMemActionQueue(){
 	contech::Task::memOpCollection memOps = currTask->getMemOps();
 	auto iter = memOps.begin();
 	while (iter != memOps.end()){
-        MemoryAction ma = *(iter);
+        contech::MemoryAction ma = *(iter);
         uint64_t addr = ma.addr;
         uint64_t alignedAddr = addr & ALIGNER;
-        memActionQueue.push(ma)
+        memActionQueue.push(ma);
         
         /* if the addr spans two cache lines, separate the memory action into 
            two acif(tions
         */
         if(addr + ACTION_SIZE > alignedAddr + LINE_SIZE){
-        	MemoryAction newMemAction = MemoryAction(alignedAddr + LINE_SIZE, 
-        		                                     POW_SIZE, ma.type);
+        	contech::MemoryAction newMemAction{(uint64_t)(alignedAddr + LINE_SIZE),
+        		(uint64_t)POW_SIZE, (contech::action_type)ma.type};
         	memActionQueue.push(newMemAction);
         }
         iter++;
@@ -41,13 +38,12 @@ void Processor::run(){
 
 	while(myContext->getSuccessful()){
 		myContext->setSuccessful(false);
-		MemoryAction ma = memActionQueue.front();
-		if(ma != NULL){
+		if (!memActionQueue.empty()) {
+			contech::MemoryAction ma = memActionQueue.front();
 			memActionQueue.pop();
 			/* align the ma.addr to cache line size */
 			ma.addr &= ALIGNER;
-			myContext->setMemOp(ma.addr, ma.type);
-
+			myContext->setMemOp(ma.addr, (contech::action_type)ma.type);
 		}
 		else{
 			if(currTask != NULL){
@@ -57,7 +53,7 @@ void Processor::run(){
 			currTask = myContext->getNextTask();
 			myContext->setSuccessful(true);
 			if(currTask != NULL){
-				this.populateMemActionQueue();
+				populateMemActionQueue();
 				continue;
 
 			}
@@ -65,7 +61,7 @@ void Processor::run(){
 				return;
 			}
 		}
-		myContext.pH.handleMemOpRequest();
+		myContext -> handleMemOpRequest();
 	}
 	return;
 }

@@ -3,13 +3,13 @@
 
 #include "common.hpp"
 
-Class Context;
+class Context;
 
 typedef struct
 {
 	bool valid;
 	bool dirty;
-	char *tag;
+	unsigned tag;
 	int lru_counter;
 } cache_line;
 
@@ -34,13 +34,15 @@ private:
 	void readLine(uint64_t addr);
 	void invalidateLine(uint64_t addr);
 	void fetchLine(uint64_t addr);
-	void updateLine(uint64_t addr, uint64_t* evictionAddr);
+	bool updateLine(uint64_t addr, uint64_t* evictionAddr);
 
 
 public:
 	Cache(int _s, int _E, int _b, Context* context);
+	Cache(Context* context);
+	~Cache();
 	void run();
-	void printSummary();
+	void printSummary(long hits, long misses, long evictions);
 
 
 };

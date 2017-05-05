@@ -2,9 +2,7 @@
 #define DIRECTORY_H
 #include "common.hpp"
 
-Class Context;
-
-
+class Context;
 
 enum DirectoryEntryStatus {UNCACHED, SHARED, MODIFIED};  // by other processors
 
@@ -15,7 +13,6 @@ struct DirectoryEntry
 	DirectoryEntryStatus status;
 };
 
-
 class Directory
 {
 private:
@@ -24,13 +21,13 @@ private:
 	std::map<uint64_t, DirectoryEntry> directory;
 
 public:
+
 	Directory(Context* context);
 	~Directory();
 
-	DirectoryEntryStatus lookUpEntry(uint64_t addr);
-	void addEntry(uint64_t addr, DirectoryEntryStatus status, int procID);
-	DirectoryEntry getOwners(uint64_t addr);
-	void removeEntry(uint64_t addr);
+	DirectoryEntry& lookUpEntry(uint64_t addr);
+	void updateEntry(uint64_t addr, DirectoryEntryStatus status, int procID);
+	DirectoryEntry& getOwners(uint64_t addr);
 };
 
 

@@ -30,6 +30,9 @@ struct Message{
 	MessageType msgType;
 	/* latency of communication */
 	unsigned latency;
+	Message(int sid, uint64_t a, MessageType type, unsigned l) {
+		sourceID = sid; addr = a; msgType = type; latency = l;
+	}
 
 };
 

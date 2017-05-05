@@ -6,17 +6,17 @@ Context::Context(int _contextId, protocolType _protocol, Simulator* _simulator){
 	// create protocolHandler object based on the protocol
 	switch(_protocol) {
     case MSI: 
-    	pH = new MSIProtocolHandler(this);
+    	pH = new MSIHandler(this);
     	break;
     default:
-    	pH = new MSIProtocolHandler(this);
+    	pH = new MSIHandler(this);
 	}
 
 	// create processor object
 	processor = new Processor(this);
 
 	// create directory object
-	dir = new Directory(this);
+	directory = new Directory(this);
 
 	// create cache object
 	cache = new Cache(this);
@@ -35,15 +35,15 @@ void Context::addToTaskQueue(contech::Task* _Task){
 }
 
 contech::Task* Context::getNextTask(){
-	if (contech::TaskQueue.empty())	return NULL;
+	if (taskQueue.empty())	return NULL;
 	contech::Task* nextTask = taskQueue.front();
 	taskQueue.pop();
 	return nextTask;
 }
 
-void Context::setMemOp(uint64 addr, contech::action_type type) {
+void Context::setMemOp(uint64_t addr, contech::action_type type) {
 	currentMemOp.addr = addr;
-	currentMemOp.action_type = type;
+	currentMemOp.actionType = type;
 }
 
 MemOp& Context::getMemOp() {
@@ -51,7 +51,7 @@ MemOp& Context::getMemOp() {
 }
 
 void Context::addCompletedTask(contech::Task* Task) {
-	completedTasks.emplace_back(Task);
+	completedTasks.push_back(Task);
 }
 
 vector<contech::Task*>& Context::getCompletedTasks() {
@@ -71,18 +71,18 @@ bool Context::getSuccessful() {
 }
 
 void Context::addToCacheMsgQueue(Message* msg) {
-	cacheMsgQueue.emplace_back(msg);
+	cacheMsgQueue.push_back(msg);
 }
 
-vector<Message*>& Context::getCacheMsgQueue() {
+std::vector<Message*>& Context::getCacheMsgQueue() {
 	return cacheMsgQueue;
 }
 
 void Context::addToIncomingMsgQueue(Message* msg) {
-	incomingMsgQueue.emplace_back(msg);
+	incomingMsgQueue.push_back(msg);
 }
 
-vector<Message*>& Context::getIncomingMsgQueue() {
+std::vector<Message*>& Context::getIncomingMsgQueue() {
 	return incomingMsgQueue;
 }
 
@@ -99,7 +99,7 @@ Context* Context::getContextById(int id) {
 	return simulator -> getContextById(id);
 }
 
-std::map<uint64_t, std::queue<Message*> >& Context::getBlockedMsgMap() {
+std::map<uint64_t, std::vector<Message*> >& Context::getBlockedMsgMap() {
 	return blockedMsgMap;
 }
 
@@ -107,12 +107,16 @@ int Context::getNumContexts() {
 	return simulator -> getNumContexts();
 }
 
-DirectoryEntry Context::lookupDirectoryEntry(uint64_t addr) {
-	return directory -> lookupEntry(uint64_t);
+DirectoryEntry& Context::lookupDirectoryEntry(uint64_t addr) {
+	return directory -> lookUpEntry(addr);
 }
 
 void Context::updateDirectoryEntry(uint64_t addr, DirectoryEntryStatus status, int pid) {
 	directory -> updateEntry(addr, status, pid);
+}
+
+void Context::handleMemOpRequest() {
+	pH -> handleMemOpRequest();
 }
 
 
