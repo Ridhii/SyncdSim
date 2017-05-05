@@ -1,17 +1,18 @@
 #ifndef DIRECTORY_H
 #define DIRECTORY_H
 #include "common.hpp"
+#include "context.hpp"
 
 class Context;
 
-enum DirectoryEntryStatus {UNCACHED, SHARED, MODIFIED};  // by other processors
+// enum DirectoryEntryStatus {UNCACHED, SHARED, MODIFIED};  // by other processors
 
-struct DirectoryEntry
-{
-	// a bit vector where bit i indicates whether Pi currently owns the line
-	std::vector<bool> processorMask;	
-	DirectoryEntryStatus status;
-};
+// struct DirectoryEntry
+// {
+// 	// a bit vector where bit i indicates whether Pi currently owns the line
+// 	std::vector<bool> processorMask;	
+// 	DirectoryEntryStatus status;
+// };
 
 class Directory
 {

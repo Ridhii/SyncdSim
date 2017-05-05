@@ -1,5 +1,6 @@
 #ifndef SIMULATOR_HPP
 #define SIMULATOR_HPP
+
 #include "common.hpp"
 #include "context.hpp"
 

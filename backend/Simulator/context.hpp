@@ -3,12 +3,20 @@
 
 #include "common.hpp"
 #include "processor.hpp"
-#include "ProtocolHandler.hpp"
+#include "protocolHandler.hpp"
 #include "MSIHandler.hpp"
 #include "directory.hpp"
 #include "cache.hpp"
+#include "simulator.hpp"
 
 class Simulator;
+class Processor;
+class ProtocolHandler;
+class MSIHandler;
+class Directory;
+class Cache;
+class Directory;
+
 
 struct MemOp
 {
@@ -56,7 +64,6 @@ public:
 	bool getSuccessful();
 	void setSuccessful(bool isSuccessful);
 
-	void addCacheMsg(Message* msg);
 	void addToCacheMsgQueue(Message* msg);
 	std::vector<Message*>& getCacheMsgQueue();
 

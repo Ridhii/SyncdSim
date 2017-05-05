@@ -3,13 +3,11 @@
 
 #include "common.hpp"
 
-class Context; 
-
 class ProtocolHandler
 {
 public:
-	ProtocolHandler();
-	~ProtocolHandler();
+	ProtocolHandler(){};
+	~ProtocolHandler(){};
 	virtual void handleMemOpRequest() = 0;
 	virtual void checkIncomingMsgQueue() = 0;
 

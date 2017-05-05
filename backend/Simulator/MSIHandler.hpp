@@ -1,10 +1,9 @@
 #ifndef MSI_HANDLER_HPP
 #define MSI_HANDLER_HPP
 
-#include "protocolHandler.hpp"
-
+#include "context.hpp"
 enum MSIStatus {M, S, I};
-
+class Context;
 
 class MSIHandler: public ProtocolHandler {
 private:

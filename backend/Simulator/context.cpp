@@ -1,5 +1,6 @@
 #include "context.hpp"
 
+
 Context::Context(int _contextId, protocolType _protocol, Simulator* _simulator){
 	contextId = _contextId;
 	simulator = _simulator;
