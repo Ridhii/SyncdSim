@@ -31,7 +31,6 @@ void Simulator::run(){
 		for (Context* c : contexts){
 			c->run();
 			// check if a context completed any Tasks in the tick
-			// NOTE: PROCESSOR WILL HAVE TO CLEAR THIS LIST AT THE BEGINNING OF EACH TICK
 			for (contech::Task* t : c->getCompletedTasks()){
 				numUnfinishedTasks --;
 				std::vector<contech::TaskId> successors = t -> getSuccessorTasks();
@@ -67,6 +66,9 @@ void Simulator::run(){
 							// decrement child count for all its predecessors
 							for(auto pred : pendingSuccessors[successorTid].predecessors) {
 	  							completedPredecessors[pred] --;
+	  							if(completedPredecessors[pred] == 0){
+	  								completedPredecessors.erase(pred);
+	  							}
 							}    
 							// remove map entry
 							pendingSuccessors.erase(successorTid);

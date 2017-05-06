@@ -3,9 +3,9 @@
 Cache::Cache(Context* context) {
     myContext = context;
 
-    s = 2;
-    E = 4;
-    b = 9;
+    s = 2; // 2 set bits, i.e. 4 sets in total
+    E = 4; // 4 lines every set
+    b = 9; // block bits, i.e. each line has 64 byte
 
     t = 64 - s - b;
     S = (int)pow(2,s); 
