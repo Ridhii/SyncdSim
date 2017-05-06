@@ -42,8 +42,6 @@ private:
 	std::vector<Message*> incomingMsgQueue;
 	std::map<uint64_t, std::vector<Message*> > blockedMsgMap;
 
-	bool successfulMemOp;
-
    	MemOp currentMemOp;
    	bool currentMemOpSuccessful;
 

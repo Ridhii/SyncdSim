@@ -10,10 +10,10 @@ int main(int argc, char** argv)
 {
     if (argc == 3)
     {   
-        protocol = MSI;
+        Simulator simulator = Simulator(argv[0], protocol);
+        protocol = protocol::MSI;
         cacheLatency = 2;
         nodeLatency  = 1;
-        Simulator simulator = Simulator(argv[0], protocol);
         simulator.run();
     }
 

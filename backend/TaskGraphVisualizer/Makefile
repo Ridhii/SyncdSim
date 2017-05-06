@@ -19,3 +19,4 @@ taskViz: $(OBJECTS)
 clean:
 	rm -f *.o
 	rm -f taskViz
+

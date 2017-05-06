@@ -21,6 +21,8 @@ Context::Context(int _contextId, protocolType _protocol, Simulator* _simulator){
 
 	// create cache object
 	cache = new Cache(this);
+	currentMemOpSuccessful = true;
+
 
 }
 
