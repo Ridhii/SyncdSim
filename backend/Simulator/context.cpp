@@ -92,8 +92,10 @@ int Context::getContextId() {
 }
 
 int Context::getHomeNodeIdByAddr(uint64_t addr) {
-	// TODO!!!
-	return -1;
+	int numContexts = simulator -> getNumContexts();
+	int shift = 64 - (int)log2(numContexts);
+
+	return addr >> shift;
 }
 
 Context* Context::getContextById(int id) {
