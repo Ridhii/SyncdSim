@@ -3,6 +3,7 @@
 
 
 #include "common.hpp"
+#include "context.hpp"
 
 class Context;
 

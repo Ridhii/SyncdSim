@@ -92,7 +92,7 @@ void MSIHandler::handleMemOpRequest() {
 		else {
 			Message* outMsg = new Message(
 				myId, addr, MessageType::CACHE_UPDATE, cacheLatency);
-			myContext -> addCacheMsg(outMsg);
+			myContext -> addToCacheMsgQueue(outMsg);
 		}
 		return;
 	}
@@ -115,7 +115,7 @@ void MSIHandler::handleMemOpRequest() {
 		else {
 			Message* outMsg = new Message(
 				myId, addr, MessageType::CACHE_READ, cacheLatency);
-			myContext -> addCacheMsg(outMsg);
+			myContext -> addToCacheMsgQueue(outMsg);
 		}
 
 		return;	

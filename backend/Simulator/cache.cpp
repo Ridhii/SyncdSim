@@ -56,7 +56,6 @@ cache_line& Cache::getLine(uint64_t addr) {
             return cache[set_idx][i];
         }
     }
-
     // throw exception
 }
 

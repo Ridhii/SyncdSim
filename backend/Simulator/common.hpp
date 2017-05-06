@@ -40,6 +40,17 @@ extern char* f;
 extern int nodeLatency;
 extern int cacheLatency;
 
+enum DirectoryEntryStatus {UNCACHED, SHARED, MODIFIED};  // by other processors
+
+struct DirectoryEntry
+{
+	// a bit vector where bit i indicates whether Pi currently owns the line
+	std::vector<bool> processorMask;	
+	DirectoryEntryStatus status;
+};
+
+
+
 
 
 

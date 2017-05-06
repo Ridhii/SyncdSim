@@ -2,6 +2,7 @@
 #define CACHE_HPP
 
 #include "common.hpp"
+#include "context.hpp"
 
 class Context;
 
