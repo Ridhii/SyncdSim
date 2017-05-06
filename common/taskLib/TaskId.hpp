@@ -1,6 +1,7 @@
 #ifndef TASK_ID_HPP
 #define TASK_ID_HPP
 
+#define __ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES 0
 #include <inttypes.h>
 #include <iostream>
 #include <sstream>
@@ -80,10 +81,10 @@ namespace std
         typedef size_t result_type;
         typedef contech::TaskId argument_type;
 
-        result_type operator()(contech::TaskId const & in) const noexcept
-        {
-            return hash<uint64_t>()(in.id);
-        }
+        // result_type operator()(contech::TaskId const & in) const noexcept;
+        // {
+        //     return hash<uint64_t>()(in.id);
+        // }
     };
 }
 
