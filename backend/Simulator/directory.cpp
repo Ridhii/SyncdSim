@@ -51,9 +51,10 @@ void Directory::updateEntry(uint64_t addr, DirectoryEntryStatus status, int proc
 			}
 		}
 	}
-	if(status == DirectoryEntryStatus.UNCACHED){
+	if(status == DirectoryEntryStatus::UNCACHED){
 		directory.erase(addr);
 	}
+}
 	
 DirectoryEntry& Directory::getOwners(uint64_t addr){
 	assert(directory.find(addr) != directory.end());
