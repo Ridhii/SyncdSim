@@ -38,6 +38,7 @@ void MSIHandler::addToBlockedMsgMap(Message* msg) {
 		q.push_back(msg);
 		blockedMsgMap.insert(std::pair<uint64_t, std::vector<Message*> > (addr, q));
 	}
+	printf("added to blockedMsgMap \n");
 }
 
 void MSIHandler::checkBlockedQueueAtAddress(uint64_t addr) {
@@ -72,6 +73,7 @@ void MSIHandler::handleMemOpRequest() {
 		*/
 		if (cacheLineStatus.find(addr) == cacheLineStatus.end()) {			
 			int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
+			cout << "line in invalid state, sending a WRITE_MISS to homeNode " << homeNodeId << "\n";
 			sendMsgToNode(homeNodeId, addr, MessageType::WRITE_MISS);
 		}
 		/* 
@@ -127,11 +129,16 @@ void MSIHandler::handleMemOpRequest() {
 
 bool MSIHandler::handleMessage(Message* msg) {
 
+	    printf("handleMessage is called \n");
+
 	 	MessageType type = msg -> msgType;
 	 	uint64_t addr = msg -> addr;
 	 	int srcId = msg -> sourceID;
 
+	 	cout << "recvd a msg " << type << " from node " << srcId << "\n";
+
 	 	MemOp currOp = myContext -> getMemOp();
+	 	printf("currOp action is %d  and addr is %llx \n", currOp.actionType, currOp.addr);
 	 	uint64_t opAddr = currOp.addr;
 
 	 	Message* m;
@@ -166,9 +173,11 @@ bool MSIHandler::handleMessage(Message* msg) {
 
 	 		//=============================== WRITE_MISS ===============================
 	 		case WRITE_MISS:
+	 		    cout << "about to access the blockedMsgMap\n" ;
 	 			if (blockedMsgMap.find(addr) == blockedMsgMap.end()) {
 	 				DirectoryEntry entry = myContext -> lookupDirectoryEntry(addr);
 	 				if (entry.status == DirectoryEntryStatus::UNCACHED) {
+	 					cout << "sending a DATA_VALUE_REPLY to node" << srcId << "\n";
 	 					sendMsgToNode(srcId, addr, MessageType::DATA_VALUE_REPLY);	 					
 	 					myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus::MODIFIED, srcId);
 	 				} 
@@ -186,12 +195,14 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 					return false;
 	 				}
 	 				else {	// MODIFIED
+	 					printf("directory entry is already MODIFIED\n");
 	 					int ownerId = 0;
 	 					for (bool isOwner : entry.processorMask) {
 	 						if (isOwner)	break;
 	 						ownerId++;
 	 					}
-	 					sendMsgToNode(ownerId, addr, MessageType::FETCH_INVALIDATE);
+	 					assert(ownerId < myContext->getNumContexts());
+	 				    sendMsgToNode(ownerId, addr, MessageType::FETCH_INVALIDATE);
 	 					return false;
 	 				}
 	 			}
@@ -316,7 +327,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 			 * change cacheLineStatus[addr]
 	 			 * tell local cache to update the line
 				*/
-	 			// TODO : assert successful to be 0
+	 			assert(myContext->getSuccessful() == false);
 	 			// if a WRITE_MISS
 				if (currOp.actionType == contech::action_type::action_type_mem_write) {
 					cacheLineStatus.insert(std::pair<uint64_t, MSIStatus> (addr,MSIStatus::M));
@@ -324,6 +335,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 				else { // if a READ_MISS
 					cacheLineStatus.insert(std::pair<uint64_t, MSIStatus> (addr,MSIStatus::S));
 				}
+				cout << "recvd a DATA_VALUE_REPLY, update the cache \n";
 				sendMsgToCache(addr, MessageType::CACHE_UPDATE);
 	 			break;
 
@@ -439,6 +451,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 			break;
 
 	 	}
+	 	printf("handle msg returns\n");
 	 	return true;
 }
 
@@ -458,23 +471,29 @@ void MSIHandler::checkIncomingMsgQueue() {
 			msg -> latency--;
 		}
 	}
-
-	// NO NEED because we only block a message after we try to service it
-
-	// for (auto itr = blockedMsgMap.begin(); itr != blockedMsgMap.end(); ++itr) {
-	// 	for (auto msg : itr -> second) {	// map values are queues
-	// 		if (msg -> latency > 0) {	
-	// 			msg -> latency--;
+	// for (Message* msg : messages) {
+	// 	if (msg -> latency == 0) {
+	// 		if (!handleMessage(msg)) {
+	// 			addToBlockedMsgMap(msg);
 	// 		}
 	// 	}
 	// }
-
-	for (Message* msg : messages) {
-		if (msg -> latency == 0) {
-			if (!handleMessage(msg)) {
+	cout << "messages.size() = " << messages.size() << "\n";
+	int i;
+	for(i = 0; i < messages.size(); i++){
+		Message* msg = messages[i];
+	    if (msg -> latency == 0) {
+	    	cout << "msgLatency is " << msg->latency << "\n";
+	    	if (!handleMessage(msg)) {
+	    		printf("adding to blockedMsgMap\n");
 				addToBlockedMsgMap(msg);
 			}
 		}
+		else{
+			break;
+		}
 	}
+	messages.erase(messages.begin(), messages.begin() + i);
+	cout << "messages.size() = " << messages.size() << "\n";
 	
 }

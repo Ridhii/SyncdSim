@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 
-
 enum MessageType {CACHE_READ, 
 					CACHE_READ_REPLY, 
 					CACHE_UPDATE, 
@@ -29,8 +28,8 @@ struct Message{
 	uint64_t addr;
 	MessageType msgType;
 	/* latency of communication */
-	unsigned latency;
-	Message(int sid, uint64_t a, MessageType type, unsigned l) {
+	signed latency;
+	Message(int sid, uint64_t a, MessageType type, signed l) {
 		sourceID = sid; addr = a; msgType = type; latency = l;
 	}
 

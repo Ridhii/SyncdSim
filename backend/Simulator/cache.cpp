@@ -49,7 +49,7 @@ cache_line& Cache::getLine(uint64_t addr) {
     unsigned tag = addr >> (s+b);
     unsigned set_idx = (addr << t) >> (t+b);
 
-    // search all lines int the set with specified index
+    // search all lines in the set with specified index
     for (int i=0; i<E; ++i){
         if(cache[set_idx][i].tag == tag && cache[set_idx][i].valid == true)// cache hit
         { 
@@ -148,7 +148,9 @@ bool Cache::updateLine(uint64_t addr, uint64_t* evictionAddr) {
 void Cache::run() {
     std::vector<Message*> messages = myContext -> getCacheMsgQueue();
     for (Message* msg : messages) {
-        msg -> latency--;
+        if (msg -> latency > 0) {
+            msg -> latency--;
+        }
     }
 
     Message* msg = messages.front();

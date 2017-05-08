@@ -4,10 +4,17 @@
 
 Simulator::Simulator(char* f, protocolType protocol){
 	cycleCount = 0;
+	printf("initialize a simulator\n");
 	tg = contech::TaskGraph::initFromFile(f);
 	numContexts = tg -> getNumberOfContexts();
-	numContexts = pow(2, floor(log(numContexts)/log(2))); // round down to nearest power of 2
+	numContexts = 4; // pow(2, floor(log(numContexts)/log(2))); // round down to nearest power of 2
+    #ifdef DEBUG
+	printf("Number of rounded contexts is %d \n", numContexts);
+	#endif
+	
 	numUnfinishedTasks = tg -> getNumberOfTasks();
+	// FOR DEBUGGING
+	numUnfinishedTasks = 4;
 
 	// initialize contexts
 	for (int i = 0; i < numContexts; ++i){
@@ -21,12 +28,16 @@ Simulator::Simulator(char* f, protocolType protocol){
 	// mod cid 
 	cid = cid % numContexts;
 	contexts[cid]->addToTaskQueue(firstTask);
+	printf("Simulator created\n");
 
 }
 
 void Simulator::run(){
+	
 	while (numUnfinishedTasks != 0) {
 		cycleCount ++;
+		printf("--------------- Cycle Count %d -------------------------\n", cycleCount);
+		printf("------------------------------------------------------\n");
 		// run all processors and protocolHandlers
 		for (Context* c : contexts){
 			c->run();
@@ -76,6 +87,8 @@ void Simulator::run(){
 			} // end for completed Tasks
 		} // end for contexts
 	} // end while
+	printResult();
+
 }
 
 void Simulator::printResult(){

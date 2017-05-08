@@ -22,14 +22,21 @@ Context::Context(int _contextId, protocolType _protocol, Simulator* _simulator){
 	// create cache object
 	cache = new Cache(this);
 	currentMemOpSuccessful = true;
+	printf("context %d created \n",contextId);
 
 
 }
 
 
 void Context::run(){
-      pH -> checkIncomingMsgQueue();
-      processor -> run();
+	printf("context run for contextId %d starts \n", contextId);
+	cache -> run();
+	printf("cache finishes run\n");
+    pH -> checkIncomingMsgQueue();
+    printf("checkIncomingMsgQueue finishes run\n");
+    processor -> run();
+    printf("processor finishes run\n");
+    printf("context run for contextId %d finishes\n", contextId);
 }
 
 
@@ -82,6 +89,7 @@ std::vector<Message*>& Context::getCacheMsgQueue() {
 }
 
 void Context::addToIncomingMsgQueue(Message* msg) {
+	printf("MSG IS ADDED %d'S QUEUE\n", contextId);
 	incomingMsgQueue.push_back(msg);
 }
 
@@ -95,7 +103,9 @@ int Context::getContextId() {
 
 int Context::getHomeNodeIdByAddr(uint64_t addr) {
 	int numContexts = simulator -> getNumContexts();
-	int shift = 64 - (int)log2(numContexts);
+	// FOR DEBUGGING
+	//int shift = 64 - (int)log2(numContexts);
+	int shift = 48 - (int)log2(numContexts);
 
 	return addr >> shift;
 }

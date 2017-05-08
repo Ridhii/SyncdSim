@@ -2,6 +2,8 @@
 #define COMMON_HPP
 
 #include <stdint.h>
+#include <inttypes.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <map>
 #include <stdlib.h>
@@ -24,7 +26,9 @@
 #include "../../common/taskLib/TaskGraph.hpp"
 #include "message.hpp"
 
-#define ALIGNER 0xFFFFFE00
+#define DEBUG true
+
+#define ALIGNER 0xFFFFFFFFFE00
 #define LINE_SIZE 64
 #define ACTION_SIZE 8
 #define POW_SIZE 3
