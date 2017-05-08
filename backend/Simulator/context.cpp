@@ -29,6 +29,7 @@ Context::Context(int _contextId, protocolType _protocol, Simulator* _simulator){
 
 
 void Context::run(){
+	clearCompletedTasks();
 	printf("context run for contextId %d starts \n", contextId);
 	cache -> run();
 	printf("cache finishes run\n");

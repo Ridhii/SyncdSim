@@ -21,6 +21,7 @@ DirectoryEntry& Directory::lookUpEntry(uint64_t addr) {
 
 void Directory::updateEntry(uint64_t addr, DirectoryEntryStatus status, int procID) {
 	
+	printf("in directory, procId is %d \n", procID);
 	if(directory.find(addr) == directory.end()){
 		DirectoryEntry dirEntry;
 		dirEntry.processorMask.reserve(numContexts);
@@ -41,6 +42,7 @@ void Directory::updateEntry(uint64_t addr, DirectoryEntryStatus status, int proc
 		directory[addr].processorMask[procID] = true;
 	}
 	if(status == DirectoryEntryStatus::MODIFIED){
+		printf("updating the directory entry for addr %llx to be MODIFIED for procID %d\n", addr, procID);
 		directory[addr].status = status;
 		for(int i = 0; i < numContexts; i++){
 			if(i == procID){

@@ -174,11 +174,17 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 		case WRITE_MISS:
 	 		    cout << "about to access the blockedMsgMap\n" ;
 	 			if (blockedMsgMap.find(addr) == blockedMsgMap.end()) {
-	 				DirectoryEntry entry = myContext -> lookupDirectoryEntry(addr);
+	 				DirectoryEntry& entry = myContext -> lookupDirectoryEntry(addr);
 	 				if (entry.status == DirectoryEntryStatus::UNCACHED) {
 	 					cout << "sending a DATA_VALUE_REPLY to node" << srcId << "\n";
 	 					sendMsgToNode(srcId, addr, MessageType::DATA_VALUE_REPLY);	 					
 	 					myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus::MODIFIED, srcId);
+	 					DirectoryEntry& modEntry = myContext -> lookupDirectoryEntry(addr);
+	 					int i = 0;
+	 					for(i = 0; i < modEntry.processorMask.size(); i++){
+	 						cout << modEntry.processorMask[i];
+	 						printf("\n"); 
+	 					}
 	 				} 
 	 				else if (entry.status == DirectoryEntryStatus::SHARED) {
 	 					int sharerId = 0;
@@ -195,11 +201,17 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 				}
 	 				else {	// MODIFIED
 	 					printf("directory entry is already MODIFIED\n");
+	 					int i = 0;
+	 					for(i = 0; i < entry.processorMask.size(); i++){
+	 						cout << entry.processorMask[i];
+	 						printf("\n"); 
+	 					}
 	 					int ownerId = 0;
 	 					for (bool isOwner : entry.processorMask) {
 	 						if (isOwner)	break;
 	 						ownerId++;
 	 					}
+	 					printf("owner ID is %d\n", ownerId);
 	 					assert(ownerId < myContext->getNumContexts());
 	 				    sendMsgToNode(ownerId, addr, MessageType::FETCH_INVALIDATE);
 	 					return false;

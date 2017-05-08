@@ -13,6 +13,7 @@ private:
 	contech::Task* currTask;
 	std::queue<contech::MemoryAction> memActionQueue;
 	Context* myContext;
+	int tempTotalTask;
 
 public:
 	Processor(Context* context);

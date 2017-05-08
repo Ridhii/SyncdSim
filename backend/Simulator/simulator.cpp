@@ -14,7 +14,7 @@ Simulator::Simulator(char* f, protocolType protocol){
 	
 	numUnfinishedTasks = tg -> getNumberOfTasks();
 	// FOR DEBUGGING
-	numUnfinishedTasks = 4;
+	numUnfinishedTasks = 9;
 
 	// initialize contexts
 	for (int i = 0; i < numContexts; ++i){
@@ -44,8 +44,11 @@ void Simulator::run(){
 			// check if a context completed any Tasks in the tick
 			for (contech::Task* t : c->getCompletedTasks()){
 				numUnfinishedTasks --;
+				printf("******* TASK FINISHED ********\n");
 				std::vector<contech::TaskId> successors = t -> getSuccessorTasks();
+				printf("successors size is %lu\n", successors.size());
 				if (successors.size() != 0) {
+					printf("getting successors\n");
 					contech::TaskId predecessorTid = t -> getTaskId();
 					// add the completed contech::Task and number of its successors to map
 					completedPredecessors.insert( std::pair<contech::TaskId, unsigned int>(predecessorTid, successors.size()));
@@ -59,6 +62,7 @@ void Simulator::run(){
 						// the successor hasn't been added
 						else {	
 							// create map entry for this successor
+							printf("creating a map entry for successor\n");
 							contech::Task* newSuccessor = tg -> getTaskById(successorTid);
 							std::vector<contech::TaskId> preds = newSuccessor -> getPredecessorTasks();
 							std::set<contech::TaskId> s(preds.begin(), preds.end());
@@ -72,6 +76,7 @@ void Simulator::run(){
 							contech::Task* newTask = tg -> getTaskById(successorTid);
 							unsigned cid = (uint32_t)(newTask -> getContextId());
 							cid = cid % numContexts;
+							printf("assigning the successor task to it's context %d\n", cid);
 							contexts[cid] -> addToTaskQueue(newTask);
 							// iterate through predecessor set and
 							// decrement child count for all its predecessors

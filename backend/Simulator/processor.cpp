@@ -1,6 +1,5 @@
 #include "processor.hpp"
 //FOR DEBUGGing
-int tempTotalTask = 0;
 
 Processor::Processor(Context* context){
     
@@ -9,6 +8,7 @@ Processor::Processor(Context* context){
     */
 	myContext = context;
 	currTask  = NULL;
+	tempTotalTask = 0;
 }
 
 void Processor::populateMemActionQueue(){
@@ -61,7 +61,7 @@ void Processor::populateMemActionQueue(){
 
 void Processor::run(){
 
-	while(myContext->getSuccessful() && (tempTotalTask == 0)){
+	while(myContext->getSuccessful()){
 		myContext->setSuccessful(false);
 		if (!memActionQueue.empty()) {
 			contech::MemoryAction ma = memActionQueue.front();
@@ -74,16 +74,16 @@ void Processor::run(){
 		}
 		else{
 			if(currTask != NULL){
+				printf("current task completed, pushing on the completedTaskQueue\n");
 				myContext->addCompletedTask(currTask);
+				currTask = NULL;
 				tempTotalTask += 1;
-				if(tempTotalTask == 1){
-					return;
-				}
 
 			}
+			printf("getting the next task \n");
 			currTask = myContext->getNextTask();
 			myContext->setSuccessful(true);
-			if(currTask != NULL){
+			if(currTask != NULL && (tempTotalTask == 0)){
 				populateMemActionQueue();
 				continue;
 
