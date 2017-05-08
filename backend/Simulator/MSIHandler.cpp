@@ -459,14 +459,14 @@ bool MSIHandler::handleMessage(Message* msg) {
 
 
 void MSIHandler::checkIncomingMsgQueue() {
-	std::vector<Message*> messages = myContext -> getIncomingMsgQueue();
-	std::map<uint64_t, std::vector<Message*> > blockedMsgMap = myContext -> getBlockedMsgMap();
+	//std::vector<Message*> messages = myContext -> getIncomingMsgQueue();
+	//std::map<uint64_t, std::vector<Message*> > blockedMsgMap = myContext -> getBlockedMsgMap();
 
 	/* 
 	* First, loop through the entire incomingMsgQueue and all entries in blockedMsgMap
 	* to decrement their latency count
 	*/
-	for (Message* msg : messages) {
+	for (Message* msg : myContext -> getIncomingMsgQueue()) {
 		if (msg -> latency > 0) {
 			msg -> latency--;
 		}
@@ -478,10 +478,10 @@ void MSIHandler::checkIncomingMsgQueue() {
 	// 		}
 	// 	}
 	// }
-	cout << "messages.size() = " << messages.size() << "\n";
+	cout << "message queue size = " << myContext -> getIncomingMsgQueue().size() << "\n";
 	int i;
-	for(i = 0; i < messages.size(); i++){
-		Message* msg = messages[i];
+	for(i = 0; i < myContext -> getIncomingMsgQueue().size(); i++){
+		Message* msg = myContext -> getIncomingMsgQueue()[i];
 	    if (msg -> latency == 0) {
 	    	cout << "msgLatency is " << msg->latency << "\n";
 	    	if (!handleMessage(msg)) {
@@ -493,7 +493,7 @@ void MSIHandler::checkIncomingMsgQueue() {
 			break;
 		}
 	}
-	messages.erase(messages.begin(), messages.begin() + i);
-	cout << "messages.size() = " << messages.size() << "\n";
-	
+	myContext -> getIncomingMsgQueue().erase(myContext -> getIncomingMsgQueue().begin(), myContext -> getIncomingMsgQueue().begin() + i);
+	cout << "message queue size after deletion = " << myContext -> getIncomingMsgQueue().size() << "\n";
+
 }
