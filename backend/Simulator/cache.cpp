@@ -146,7 +146,7 @@ bool Cache::updateLine(uint64_t addr, uint64_t* evictionAddr) {
  * take care of messages that have reached 0
  */
 void Cache::run() {
-    std::vector<Message*> messages = myContext -> getCacheMsgQueue();
+    std::vector<Message*>& messages = myContext -> getCacheMsgQueue();
     for (Message* msg : messages) {
         if (msg -> latency > 0) {
             msg -> latency--;

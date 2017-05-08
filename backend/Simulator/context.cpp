@@ -114,10 +114,6 @@ Context* Context::getContextById(int id) {
 	return simulator -> getContextById(id);
 }
 
-std::map<uint64_t, std::vector<Message*> >& Context::getBlockedMsgMap() {
-	return blockedMsgMap;
-}
-
 int Context::getNumContexts() {
 	return simulator -> getNumContexts();
 }
