@@ -31,6 +31,7 @@ MSIHandler::~MSIHandler() {
 
 
 void MSIHandler::sendMsgToNode(int dstId, uint64_t addr, MessageType MessageType) {
+	myContext->incNumSentMsgs();
 	int myId = myContext -> getContextId();
 	Message* outMsg = new Message(
 	 					myId, addr, MessageType, nodeLatency);
@@ -90,7 +91,8 @@ void MSIHandler::handleMemOpRequest() {
 		*  send a WRITE_MISS message to home node
 		*  expect a DATA_VALUE_REPLY from home node
 		*/
-		if (cacheLineStatus.find(addr) == cacheLineStatus.end()) {			
+		if (cacheLineStatus.find(addr) == cacheLineStatus.end()) {
+		    myContext->incCacheMiss();			
 			int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
 			cout << "line in an invalid state, sending a WRITE_MISS to homeNode " << homeNodeId << "\n";
 			sendMsgToNode(homeNodeId, addr, MessageType::WRITE_MISS);
@@ -101,6 +103,7 @@ void MSIHandler::handleMemOpRequest() {
 		*  expect a INVALIDATE_ACK from home node
 		*/
 		else if (cacheLineStatus[addr] == MSIStatus::S) {
+			myContext->incCacheHit();
 			int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
 			cout << "line in a shared state, sending an INVALIDATE to homeNode " << homeNodeId << "\n";
 			sendMsgToNode(homeNodeId, addr, MessageType::INVALIDATE);
@@ -112,6 +115,7 @@ void MSIHandler::handleMemOpRequest() {
 		*  expect a CACHE_UPDATE_ACK from home node
 		*/
 		else {
+			myContext->incCacheHit();
 			cout << "line in a MODIFIED state already!\n" ;
 			Message* outMsg = new Message(myId, addr, MessageType::CACHE_UPDATE, cacheLatency);
 			myContext -> addToCacheMsgQueue(outMsg);
@@ -126,6 +130,7 @@ void MSIHandler::handleMemOpRequest() {
 		*  expect a DATA_VALUE_REPLY from home node
 		*/
 		if (cacheLineStatus.find(addr) == cacheLineStatus.end()) {
+			myContext->incCacheMiss();	
 			int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
 			sendMsgToNode(homeNodeId, addr, MessageType::READ_MISS);
 		}
@@ -135,6 +140,7 @@ void MSIHandler::handleMemOpRequest() {
 		* expect a CACHE_READ_REPLY
 		*/
 		else {
+			myContext->incCacheHit();
 			Message* outMsg = new Message(
 				myId, addr, MessageType::CACHE_READ, cacheLatency);
 			myContext -> addToCacheMsgQueue(outMsg);
@@ -409,7 +415,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 		//=============================== CACHE_READ_REPLY ===============================	
 	 		case CACHE_UPDATE_ACK:
 	 			/*
-	 			* Indicates a successful write 
+	 			* Indicates a successful update
 	 			* The address must match the addr of current mem op
 	 			* we can now set successful to true so that processor can proceed
 	 			*

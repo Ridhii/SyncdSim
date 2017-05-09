@@ -2532,3 +2532,19 @@ getting the next task
 getting the next task 
 ---------------- context run for contextId 7 finishes
 Simulation is completed
+***** CONTEXT ID 0 *****
+ CacheHits = 35 CacheMisses = 4, numSentMsgs = 14
+***** CONTEXT ID 1 *****
+ CacheHits = 1 CacheMisses = 1, numSentMsgs = 1
+***** CONTEXT ID 2 *****
+ CacheHits = 1 CacheMisses = 1, numSentMsgs = 1
+***** CONTEXT ID 3 *****
+ CacheHits = 1 CacheMisses = 1, numSentMsgs = 2
+***** CONTEXT ID 4 *****
+ CacheHits = 1 CacheMisses = 1, numSentMsgs = 1
+***** CONTEXT ID 5 *****
+ CacheHits = 1 CacheMisses = 1, numSentMsgs = 1
+***** CONTEXT ID 6 *****
+ CacheHits = 1 CacheMisses = 1, numSentMsgs = 1
+***** CONTEXT ID 7 *****
+ CacheHits = 1 CacheMisses = 1, numSentMsgs = 1

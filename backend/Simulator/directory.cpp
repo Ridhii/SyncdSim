@@ -11,10 +11,10 @@ Directory::~Directory() {}
 
 DirectoryEntry& Directory::lookUpEntry(uint64_t addr) {
 	if(directory.find(addr) == directory.end()){
-		printf("no entry in directory, creating now\n");
+		//printf("no entry in directory, creating now\n");
 		updateEntry(addr, DirectoryEntryStatus::UNCACHED, -1);
 	}
-	printf("returning from directory \n");
+	//printf("returning from directory \n");
 	return directory[addr];
 }
 

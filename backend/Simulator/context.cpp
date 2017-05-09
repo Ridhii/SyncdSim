@@ -24,6 +24,10 @@ Context::Context(int _contextId, protocolType _protocol, Simulator* _simulator){
 	currentMemOpSuccessful = true;
 	printf("context %d created \n",contextId);
 
+	cacheHit = 0;
+	cacheMiss = 0;
+	numSentMsgs = 0;
+
 
 }
 
@@ -89,7 +93,7 @@ std::vector<Message*>& Context::getCacheMsgQueue() {
 }
 
 void Context::addToIncomingMsgQueue(Message* msg) {
-	printf("MSG IS ADDED %d'S QUEUE\n", contextId);
+	//printf("MSG IS ADDED %d'S QUEUE\n", contextId);
 	incomingMsgQueue.push_back(msg);
 }
 
@@ -103,8 +107,8 @@ int Context::getContextId() {
 
 int Context::getHomeNodeIdByAddr(uint64_t addr) {
 	int numContexts = simulator -> getNumContexts();
-	// FOR DEBUGGING
 	//int shift = 64 - (int)log2(numContexts);
+	/* 64 bit addresses are truncated to 48 bits */
 	int shift = 48 - (int)log2(numContexts);
 
 	return addr >> shift;
@@ -128,6 +132,25 @@ void Context::updateDirectoryEntry(uint64_t addr, DirectoryEntryStatus status, i
 
 void Context::handleMemOpRequest() {
 	pH -> handleMemOpRequest();
+}
+
+void Context::incCacheHit(){
+	cacheHit += 1;
+}
+
+void Context::incCacheMiss(){
+	cacheMiss += 1;
+}
+
+void Context::incNumSentMsgs(){
+	numSentMsgs += 1;
+
+}
+
+void Context::printContextStats(){
+	printf("***** CONTEXT ID %d *****\n", contextId);
+	printf(" CacheHits = %d CacheMisses = %d, numSentMsgs = %d\n", cacheHit, cacheMiss, numSentMsgs);
+
 }
 
 

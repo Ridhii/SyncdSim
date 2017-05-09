@@ -1,5 +1,4 @@
 #include "processor.hpp"
-//FOR DEBUGGing
 
 Processor::Processor(Context* context){
     
@@ -8,40 +7,16 @@ Processor::Processor(Context* context){
     */
 	myContext = context;
 	currTask  = NULL;
-	tempTotalTask = 0;
 }
 
 void Processor::populateMemActionQueue(){
 	assert(currTask != NULL);
-	printf("in populateMemActionQueue \n");
 	/* only called to populate the memActionQueue with the 
 	   currTask's memOps
 	*/
 	contech::Task::memOpCollection memOps = currTask->getMemOps();
 	auto iter = memOps.begin();
-	/* FOR DEBUGGING */
-	int myID = myContext->getContextId();
-	uint64_t fakeAddr;
-	if(myID == 0){
-		fakeAddr = (0x8bcdabcdabcd);
-
-	}
-	if(myID == 1){
-		fakeAddr = 0x0bcdabcdabcd;
-		
-	}
-	if(myID == 2){
-		fakeAddr = 0x0bcdabcdabcd;
-		
-	}
-	if(myID == 3){
-		fakeAddr = 0xcbcdabcdabcd;
-		
-	}
-	contech::MemoryAction newMemAction{(uint64_t)fakeAddr,
-        		                       (uint64_t)POW_SIZE, (contech::action_type)(contech::action_type_mem_write)};
-    memActionQueue.push(newMemAction);
-	/*while (iter != memOps.end()){
+	while (iter != memOps.end()){
         contech::MemoryAction ma = *(iter);
         uint64_t addr = ma.addr;
         uint64_t alignedAddr = addr & ALIGNER;
@@ -55,8 +30,9 @@ void Processor::populateMemActionQueue(){
         	memActionQueue.push(newMemAction);
         }
         iter++;
+        //DEBUGGING
+        break;
     }
-    */
 }
 
 void Processor::run(){
@@ -76,13 +52,12 @@ void Processor::run(){
 				printf("current task completed, pushing on the completedTaskQueue\n");
 				myContext->addCompletedTask(currTask);
 				currTask = NULL;
-				tempTotalTask += 1;
 
 			}
 			printf("getting the next task \n");
 			currTask = myContext->getNextTask();
 			myContext->setSuccessful(true);
-			if(currTask != NULL && (tempTotalTask == 0)){
+			if(currTask != NULL){
 				populateMemActionQueue();
 				continue;
 
