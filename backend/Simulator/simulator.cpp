@@ -14,7 +14,7 @@ Simulator::Simulator(char* f, protocolType protocol){
 	
 	numUnfinishedTasks = tg -> getNumberOfTasks();
 	// FOR DEBUGGING
-	numUnfinishedTasks = 9;
+	numUnfinishedTasks = 10;
 
 	// initialize contexts
 	for (int i = 0; i < numContexts; ++i){
@@ -33,8 +33,10 @@ Simulator::Simulator(char* f, protocolType protocol){
 }
 
 void Simulator::run(){
-	
-	while (numUnfinishedTasks != 0) {
+	/* changed this from != 0 in case we reach negative num of unfinished tasks, although that shouldn't 
+	   happen
+	*/
+	while (numUnfinishedTasks > 0) {
 		cycleCount ++;
 		printf("--------------- Cycle Count %d -------------------------\n", cycleCount);
 		printf("------------------------------------------------------\n");
@@ -44,7 +46,7 @@ void Simulator::run(){
 			// check if a context completed any Tasks in the tick
 			for (contech::Task* t : c->getCompletedTasks()){
 				numUnfinishedTasks --;
-				printf("******* TASK FINISHED ********\n");
+				printf("******* TASK FINISHED, LEFT %d ********\n", numUnfinishedTasks);
 				std::vector<contech::TaskId> successors = t -> getSuccessorTasks();
 				printf("successors size is %lu\n", successors.size());
 				if (successors.size() != 0) {

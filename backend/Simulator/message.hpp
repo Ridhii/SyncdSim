@@ -21,6 +21,7 @@ enum MessageType {CACHE_READ,
 	              	DATA_VALUE_REPLY,
 	              	DATA_WRITE_BACK
 	              	};
+
 struct Message{
     
     /* the ID of the sender */

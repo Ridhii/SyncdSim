@@ -1,0 +1,395 @@
+argc = 5 and argv[1] = blackscholes_8_simmedium.taskgraph
+taskGraph is ./simulator, node latency is 0 and cache latency is 0
+initialize a simulator
+Number of rounded contexts is 4 
+context 0 created 
+context 1 created 
+context 2 created 
+context 3 created 
+Simulator created
+--------------- Cycle Count 1 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+getting the next task 
+in populateMemActionQueue 
+memory action is 2 and addr is 8bcdabcdaa00
+line in an invalid state, sending a WRITE_MISS to homeNode 2
+MSG IS ADDED 2'S QUEUE
+---------------- context run for contextId 0 finishes
+---------------- context run for contextId 1 starts 
+getting the next task 
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+recvd a msg WRITE_MISS from node 0
+currOp action is 0  and addr is 0 
+there is no entry for this address in blockedMsgMap 
+no entry in directory, creating now
+returning from directory 
+sending a DATA_VALUE_REPLY to node0
+MSG IS ADDED 0'S QUEUE
+getting the next task 
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+getting the next task 
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 2 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+recvd a msg DATA_VALUE_REPLY from node 2
+currOp action is 2  and addr is 8bcdabcdaa00 
+recvd a DATA_VALUE_REPLY, update the cache 
+---------------- context run for contextId 0 finishes
+---------------- context run for contextId 1 starts 
+getting the next task 
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+getting the next task 
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+getting the next task 
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 3 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+MSG IS ADDED 0'S QUEUE
+recvd a msg CACHE_UPDATE_ACK from node 0
+currOp action is 2  and addr is 8bcdabcdaa00 
+received a CACHE_UPDATE_ACK for current request
+current task completed, pushing on the completedTaskQueue
+getting the next task 
+---------------- context run for contextId 0 finishes
+******* TASK FINISHED, LEFT 9 ********
+successors size is 1
+getting successors
+creating a map entry for successor
+assigning the successor task to it's context 0
+---------------- context run for contextId 1 starts 
+getting the next task 
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+getting the next task 
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+getting the next task 
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 4 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+getting the next task 
+---------------- context run for contextId 0 finishes
+---------------- context run for contextId 1 starts 
+getting the next task 
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+getting the next task 
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+getting the next task 
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 5 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+current task completed, pushing on the completedTaskQueue
+getting the next task 
+---------------- context run for contextId 0 finishes
+******* TASK FINISHED, LEFT 8 ********
+successors size is 1
+getting successors
+creating a map entry for successor
+assigning the successor task to it's context 0
+---------------- context run for contextId 1 starts 
+getting the next task 
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+getting the next task 
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+getting the next task 
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 6 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+getting the next task 
+---------------- context run for contextId 0 finishes
+---------------- context run for contextId 1 starts 
+getting the next task 
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+getting the next task 
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+getting the next task 
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 7 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+current task completed, pushing on the completedTaskQueue
+getting the next task 
+---------------- context run for contextId 0 finishes
+******* TASK FINISHED, LEFT 7 ********
+successors size is 2
+getting successors
+creating a map entry for successor
+assigning the successor task to it's context 1
+creating a map entry for successor
+assigning the successor task to it's context 0
+---------------- context run for contextId 1 starts 
+getting the next task 
+in populateMemActionQueue 
+memory action is 2 and addr is bcdabcdaa00
+line in an invalid state, sending a WRITE_MISS to homeNode 0
+MSG IS ADDED 0'S QUEUE
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+getting the next task 
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+getting the next task 
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 8 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+recvd a msg WRITE_MISS from node 1
+currOp action is 2  and addr is 8bcdabcdaa00 
+there is no entry for this address in blockedMsgMap 
+no entry in directory, creating now
+returning from directory 
+sending a DATA_VALUE_REPLY to node1
+MSG IS ADDED 1'S QUEUE
+getting the next task 
+---------------- context run for contextId 0 finishes
+---------------- context run for contextId 1 starts 
+recvd a msg DATA_VALUE_REPLY from node 0
+currOp action is 2  and addr is bcdabcdaa00 
+recvd a DATA_VALUE_REPLY, update the cache 
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+getting the next task 
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+getting the next task 
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 9 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+current task completed, pushing on the completedTaskQueue
+getting the next task 
+---------------- context run for contextId 0 finishes
+******* TASK FINISHED, LEFT 6 ********
+successors size is 1
+getting successors
+creating a map entry for successor
+assigning the successor task to it's context 0
+---------------- context run for contextId 1 starts 
+MSG IS ADDED 1'S QUEUE
+recvd a msg CACHE_UPDATE_ACK from node 1
+currOp action is 2  and addr is bcdabcdaa00 
+received a CACHE_UPDATE_ACK for current request
+current task completed, pushing on the completedTaskQueue
+getting the next task 
+---------------- context run for contextId 1 finishes
+******* TASK FINISHED, LEFT 5 ********
+successors size is 1
+getting successors
+creating a map entry for successor
+---------------- context run for contextId 2 starts 
+getting the next task 
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+getting the next task 
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 10 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+getting the next task 
+---------------- context run for contextId 0 finishes
+---------------- context run for contextId 1 starts 
+getting the next task 
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+getting the next task 
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+getting the next task 
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 11 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+current task completed, pushing on the completedTaskQueue
+getting the next task 
+---------------- context run for contextId 0 finishes
+******* TASK FINISHED, LEFT 4 ********
+successors size is 2
+getting successors
+creating a map entry for successor
+assigning the successor task to it's context 2
+creating a map entry for successor
+assigning the successor task to it's context 0
+---------------- context run for contextId 1 starts 
+getting the next task 
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+getting the next task 
+in populateMemActionQueue 
+memory action is 2 and addr is bcdabcdaa00
+line in an invalid state, sending a WRITE_MISS to homeNode 0
+MSG IS ADDED 0'S QUEUE
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+getting the next task 
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 12 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+recvd a msg WRITE_MISS from node 2
+currOp action is 2  and addr is 8bcdabcdaa00 
+there is no entry for this address in blockedMsgMap 
+returning from directory 
+directory entry is already MODIFIED
+sending a FETCH_INVALIDATE to ownerId 1
+MSG IS ADDED 1'S QUEUE
+adding to blockedMsgMap
+getting the next task 
+---------------- context run for contextId 0 finishes
+---------------- context run for contextId 1 starts 
+recvd a msg FETCH_INVALIDATE from node 0
+currOp action is 2  and addr is bcdabcdaa00 
+adding to blockedMsgMap
+getting the next task 
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+getting the next task 
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 13 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+current task completed, pushing on the completedTaskQueue
+getting the next task 
+---------------- context run for contextId 0 finishes
+******* TASK FINISHED, LEFT 3 ********
+successors size is 1
+getting successors
+creating a map entry for successor
+assigning the successor task to it's context 0
+---------------- context run for contextId 1 starts 
+MSG IS ADDED 1'S QUEUE
+recvd a msg CACHE_INVALIDATE_ACK from node 1
+currOp action is 2  and addr is bcdabcdaa00 
+recvd a CACHE_INVALIDATE_ACK, sending DATA_WRITE_BACK to node 0
+MSG IS ADDED 0'S QUEUE
+getting the next task 
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+getting the next task 
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 14 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+recvd a msg DATA_WRITE_BACK from node 1
+currOp action is 2  and addr is 8bcdabcdaa00 
+MSG IS ADDED 2'S QUEUE
+getting the next task 
+---------------- context run for contextId 0 finishes
+---------------- context run for contextId 1 starts 
+getting the next task 
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+recvd a msg DATA_VALUE_REPLY from node 0
+currOp action is 2  and addr is bcdabcdaa00 
+recvd a DATA_VALUE_REPLY, update the cache 
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+getting the next task 
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 15 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+current task completed, pushing on the completedTaskQueue
+getting the next task 
+---------------- context run for contextId 0 finishes
+******* TASK FINISHED, LEFT 2 ********
+successors size is 2
+getting successors
+creating a map entry for successor
+assigning the successor task to it's context 3
+creating a map entry for successor
+assigning the successor task to it's context 0
+---------------- context run for contextId 1 starts 
+getting the next task 
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+MSG IS ADDED 2'S QUEUE
+recvd a msg CACHE_UPDATE_ACK from node 2
+currOp action is 2  and addr is bcdabcdaa00 
+received a CACHE_UPDATE_ACK for current request
+current task completed, pushing on the completedTaskQueue
+getting the next task 
+---------------- context run for contextId 2 finishes
+******* TASK FINISHED, LEFT 1 ********
+successors size is 1
+getting successors
+creating a map entry for successor
+---------------- context run for contextId 3 starts 
+getting the next task 
+in populateMemActionQueue 
+memory action is 2 and addr is cbcdabcdaa00
+line in an invalid state, sending a WRITE_MISS to homeNode 3
+MSG IS ADDED 3'S QUEUE
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 16 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+getting the next task 
+---------------- context run for contextId 0 finishes
+---------------- context run for contextId 1 starts 
+getting the next task 
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+getting the next task 
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+recvd a msg WRITE_MISS from node 3
+currOp action is 2  and addr is cbcdabcdaa00 
+there is no entry for this address in blockedMsgMap 
+no entry in directory, creating now
+returning from directory 
+sending a DATA_VALUE_REPLY to node3
+MSG IS ADDED 3'S QUEUE
+recvd a msg DATA_VALUE_REPLY from node 3
+currOp action is 2  and addr is cbcdabcdaa00 
+recvd a DATA_VALUE_REPLY, update the cache 
+---------------- context run for contextId 3 finishes
+--------------- Cycle Count 17 -------------------------
+------------------------------------------------------
+---------------- context run for contextId 0 starts 
+current task completed, pushing on the completedTaskQueue
+getting the next task 
+---------------- context run for contextId 0 finishes
+******* TASK FINISHED, LEFT 0 ********
+successors size is 1
+getting successors
+creating a map entry for successor
+assigning the successor task to it's context 0
+---------------- context run for contextId 1 starts 
+getting the next task 
+---------------- context run for contextId 1 finishes
+---------------- context run for contextId 2 starts 
+getting the next task 
+---------------- context run for contextId 2 finishes
+---------------- context run for contextId 3 starts 
+MSG IS ADDED 3'S QUEUE
+recvd a msg CACHE_UPDATE_ACK from node 3
+currOp action is 2  and addr is cbcdabcdaa00 
+received a CACHE_UPDATE_ACK for current request
+current task completed, pushing on the completedTaskQueue
+getting the next task 
+---------------- context run for contextId 3 finishes
+******* TASK FINISHED, LEFT -1 ********
+successors size is 1
+getting successors
+creating a map entry for successor
+Simulation is completed

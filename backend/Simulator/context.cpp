@@ -30,14 +30,13 @@ Context::Context(int _contextId, protocolType _protocol, Simulator* _simulator){
 
 void Context::run(){
 	clearCompletedTasks();
-	printf("context run for contextId %d starts \n", contextId);
+	printf("---------------- context run for contextId %d starts \n", contextId);
 	cache -> run();
-	printf("cache finishes run\n");
     pH -> checkIncomingMsgQueue();
-    printf("checkIncomingMsgQueue finishes run\n");
+    //printf("checkIncomingMsgQueue finishes run\n");
     processor -> run();
-    printf("processor finishes run\n");
-    printf("context run for contextId %d finishes\n", contextId);
+    //printf("processor finishes run\n");
+    printf("---------------- context run for contextId %d finishes\n", contextId);
 }
 
 

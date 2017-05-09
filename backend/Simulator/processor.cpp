@@ -67,7 +67,6 @@ void Processor::run(){
 			contech::MemoryAction ma = memActionQueue.front();
 			memActionQueue.pop();
 			/* align the ma.addr to cache line size */
-			cout << "memory action is " << ma.type << " and" << std::hex << " addr is " << ma.addr << "\n";
 			ma.addr = ma.addr & ALIGNER;
 			cout << "memory action is " << ma.type << " and" << std::hex << " addr is " << ma.addr << "\n";
 			myContext->setMemOp(ma.addr, (contech::action_type)ma.type);
