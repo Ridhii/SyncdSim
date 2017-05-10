@@ -1,26 +1,6 @@
 #include "MSIHandler.hpp"
 
 
-const char* mString[] = {"CACHE_READ", 
-					"CACHE_READ_REPLY", 
-					"CACHE_UPDATE", 
-					"CACHE_UPDATE_ACK",
-	              	"CACHE_INVALIDATE", 
-	              	"CACHE_INVALIDATE_ACK",
-	              	"CACHE_FETCH", 
-	              	"CACHE_FETCH_ACK",
-	              	"CACHE_EVICTION_ALERT",
-	              	"WRITE_MISS", 
-	              	"READ_MISS", 
-	              	"INVALIDATE",
-	              	"INVALIDATE_ACK",
-	              	"FETCH",
-	              	"FETCH_INVALIDATE",
-	              	"DATA_VALUE_REPLY",
-	              	"DATA_WRITE_BACK"
-
-  };
-
 MSIHandler::MSIHandler(Context* context) {
 	myContext = context;
 }
@@ -102,7 +82,7 @@ void MSIHandler::handleMemOpRequest() {
 		*  send a INVALIDATE message to home node, requesting to invalidate other sharers
 		*  expect a INVALIDATE_ACK from home node
 		*/
-		else if (cacheLineStatus[addr] == MSIStatus::S) {
+		else if (cacheLineStatus[addr] == protocolStatus::S) {
 			myContext->incCacheHit();
 			int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
 			cout << "line in a shared state, sending an INVALIDATE to homeNode " << homeNodeId << "\n";
@@ -334,14 +314,14 @@ bool MSIHandler::handleMessage(Message* msg) {
 				*/
 	 			else {
 	 				cout << "received an INVALIDATE_ACK for my curr request\n";
-	 				cacheLineStatus[addr] = MSIStatus::M;
+	 				cacheLineStatus[addr] = protocolStatus::M;
 	 				sendMsgToCache(addr, MessageType::CACHE_UPDATE);
 	 			}
 	 			break;
 
 	 		//=============================== FETCH ===============================
 	 		case FETCH:
-				cacheLineStatus[addr] = MSIStatus::S;
+				cacheLineStatus[addr] = protocolStatus::S;
 	 			sendMsgToCache(addr, MessageType::CACHE_FETCH);
 	 			return false;
 	 			break;
@@ -364,10 +344,10 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 			assert(myContext->getSuccessful() == false);
 	 			// if a WRITE_MISS
 				if (currOp.actionType == contech::action_type::action_type_mem_write) {
-					cacheLineStatus.insert(std::pair<uint64_t, MSIStatus> (addr,MSIStatus::M));
+					cacheLineStatus.insert(std::pair<uint64_t, protocolStatus> (addr,protocolStatus::M));
 				}
 				else { // if a READ_MISS
-					cacheLineStatus.insert(std::pair<uint64_t, MSIStatus> (addr,MSIStatus::S));
+					cacheLineStatus.insert(std::pair<uint64_t, protocolStatus> (addr,protocolStatus::S));
 				}
 				cout << "recvd a DATA_VALUE_REPLY, update the cache \n";
 				sendMsgToCache(addr, MessageType::CACHE_UPDATE);
@@ -476,7 +456,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 			* if cacheLineStatus was MODIFIED, need to notify the home node
 	 			* change cacheLineStatus to be INVALID by removing the entry
 	 			*/
-	 			if (cacheLineStatus[addr] == MSIStatus::M) {
+	 			if (cacheLineStatus[addr] == protocolStatus::M) {
 					int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
 					sendMsgToNode(homeNodeId, addr, MessageType::DATA_WRITE_BACK);
 	 			}

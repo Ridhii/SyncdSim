@@ -22,6 +22,7 @@ enum MessageType {CACHE_READ,
 	              	DATA_VALUE_REPLY_E,
 	              	DATA_WRITE_BACK
 	              	};
+              	
 
 struct Message{
     

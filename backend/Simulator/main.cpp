@@ -6,6 +6,27 @@ int nodeLatency;
 int cacheLatency;
 protocolType protocol;
 
+const char* mString[] = {"CACHE_READ", 
+                    "CACHE_READ_REPLY", 
+                    "CACHE_UPDATE", 
+                    "CACHE_UPDATE_ACK",
+                    "CACHE_INVALIDATE", 
+                    "CACHE_INVALIDATE_ACK",
+                    "CACHE_FETCH", 
+                    "CACHE_FETCH_ACK",
+                    "CACHE_EVICTION_ALERT",
+                    "WRITE_MISS", 
+                    "READ_MISS", 
+                    "INVALIDATE",
+                    "INVALIDATE_ACK",
+                    "FETCH",
+                    "FETCH_INVALIDATE",
+                    "DATA_VALUE_REPLY",
+                    "DATA_VALUE_REPLY_E",
+                    "DATA_WRITE_BACK"
+
+  };
+  
 int main(int argc, char** argv)
 {
     /* we expect 4 input args, taskGraph file, protocolType,

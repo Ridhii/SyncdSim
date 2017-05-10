@@ -1,5 +1,4 @@
 #include "directory.hpp"
-protocolType protocol;
 
 Directory::Directory(Context* context) {
 	

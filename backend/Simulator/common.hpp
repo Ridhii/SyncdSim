@@ -44,6 +44,7 @@ extern protocolType protocol;
 extern char* f;
 extern int nodeLatency;
 extern int cacheLatency;
+extern const char* mString[];
 
 /* EXCLUSIVE is only used in MESI protocol */
 enum DirectoryEntryStatus {UNCACHED, SHARED, MODIFIED, EXCLUSIVE};  // by other processors
