@@ -1,4 +1,5 @@
 #include "directory.hpp"
+protocolType protocol;
 
 Directory::Directory(Context* context) {
 	
@@ -36,10 +37,27 @@ void Directory::updateEntry(uint64_t addr, DirectoryEntryStatus status, int proc
 		directory.insert(std::pair<uint64_t, DirectoryEntry>(addr, dirEntry));
 		return;
 	}
+	
 	if(status == DirectoryEntryStatus::SHARED){
 		directory[addr].status = status;
 		directory[addr].processorMask[procID] = true;
 	}
+	
+	if(status == DirectoryEntryStatus::EXCLUSIVE){
+		assert(protocol == protocolType::MESI);
+		assert(directory[addr].status == DirectoryEntryStatus::UNCACHED);
+		directory[addr].status = status;
+		for(int i = 0; i < numContexts; i++){
+			if(i == procID){
+				directory[addr].processorMask[i] = true;
+			}
+			else{
+				directory[addr].processorMask[i] = false;
+			}
+		}
+
+	}
+
 	if(status == DirectoryEntryStatus::MODIFIED){
 		directory[addr].status = status;
 		for(int i = 0; i < numContexts; i++){
@@ -51,6 +69,7 @@ void Directory::updateEntry(uint64_t addr, DirectoryEntryStatus status, int proc
 			}
 		}
 	}
+
 	if(status == DirectoryEntryStatus::UNCACHED){
 		directory.erase(addr);
 	}
