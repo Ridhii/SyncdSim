@@ -2,14 +2,13 @@
 #define MSI_HANDLER_HPP
 
 #include "context.hpp"
-enum MSIStatus {M, S, I};
 class Context;
 
 class MSIHandler: public ProtocolHandler {
 private:
 	Context* myContext;
 	// should match status of local cache
-	std::map<uint64_t, MSIStatus> cacheLineStatus;
+	std::map<uint64_t, protocolStatus> cacheLineStatus;
 	// as home node, how many more INVALIDATE_ACK we need 
 	std::map<uint64_t, int> pendingInvAckCount;
 

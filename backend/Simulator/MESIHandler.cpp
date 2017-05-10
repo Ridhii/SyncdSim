@@ -103,7 +103,7 @@ void MESIHandler::handleMemOpRequest() {
 		*  send a INVALIDATE message to home node, requesting to invalidate other sharers
 		*  expect a INVALIDATE_ACK from home node
 		*/
-		else if (cacheLineStatus[addr] == MESIStatus::S) {
+		else if (cacheLineStatus[addr] == protocolStatus::S) {
 			myContext->incCacheHit();
 			int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
 			cout << "line in a shared state, sending an INVALIDATE to homeNode " << homeNodeId << "\n";
@@ -115,7 +115,7 @@ void MESIHandler::handleMemOpRequest() {
 		*  send a CACHE_UPDATE to local cache
 		*  expect a CACHE_UPDATE_ACK from home node
 		*/
-		else if (cacheLineStatus[addr] == MESIStatus::M){
+		else if (cacheLineStatus[addr] == protocolStatus::M){
 			myContext->incCacheHit();
 			cout << "line in a MODIFIED state already!\n" ;
 			Message* outMsg = new Message(myId, addr, MessageType::CACHE_UPDATE, cacheLatency);
@@ -134,7 +134,7 @@ void MESIHandler::handleMemOpRequest() {
 			cout << "line in EXCLUSIVE state, promoting to MODIFIED!\n";
 			Message* outMsg = new Message(myId, addr, MessageType::CACHE_UPDATE, cacheLatency);
 			myContext -> addToCacheMsgQueue(outMsg);
-			cacheLineStatus[addr] = MESIStatus::M;
+			cacheLineStatus[addr] = protocolStatus::M;
 		}
 		return;
 	}
@@ -359,14 +359,14 @@ bool MESIHandler::handleMessage(Message* msg) {
 				*/
 	 			else {
 	 				cout << "received an INVALIDATE_ACK for my curr request\n";
-	 				cacheLineStatus[addr] = MESIStatus::M;
+	 				cacheLineStatus[addr] = protocolStatus::M;
 	 				sendMsgToCache(addr, MessageType::CACHE_UPDATE);
 	 			}
 	 			break;
 
 	 		//=============================== FETCH ===============================
 	 		case FETCH:
-				cacheLineStatus[addr] = MESIStatus::S;
+				cacheLineStatus[addr] = protocolStatus::S;
 	 			sendMsgToCache(addr, MessageType::CACHE_FETCH);
 	 			return false;
 	 			break;
@@ -389,10 +389,10 @@ bool MESIHandler::handleMessage(Message* msg) {
 	 			assert(myContext->getSuccessful() == false);
 	 			// if a WRITE_MISS
 				if (currOp.actionType == contech::action_type::action_type_mem_write) {
-					cacheLineStatus.insert(std::pair<uint64_t, MESIStatus> (addr,MESIStatus::M));
+					cacheLineStatus.insert(std::pair<uint64_t, protocolStatus> (addr,protocolStatus::M));
 				}
 				else { // if a READ_MISS
-					cacheLineStatus.insert(std::pair<uint64_t, MESIStatus> (addr,MESIStatus::S));
+					cacheLineStatus.insert(std::pair<uint64_t, protocolStatus> (addr,protocolStatus::S));
 				}
 				cout << "recvd a DATA_VALUE_REPLY, update the cache \n";
 				sendMsgToCache(addr, MessageType::CACHE_UPDATE);
@@ -408,11 +408,11 @@ bool MESIHandler::handleMessage(Message* msg) {
 				*/
 	 			assert(myContext->getSuccessful() == false);
 	 			assert(currOp.actionType == contech::action_type::action_type_mem_read);
-	 			cacheLineStatus.insert(std::pair<uint64_t, MESIStatus> (addr,MESIStatus::E));
+	 			cacheLineStatus.insert(std::pair<uint64_t, protocolStatus> (addr,protocolStatus::E));
 	 			cout << "recvd a DATA_VALUE_REPLY_E, update the cache \n";
 	 			sendMsgToCache(addr, MessageType::CACHE_UPDATE);
 
-	 			break
+	 			break;
 
 
 	 		//=============================== DATA_WRITE_BACK ===============================
@@ -519,7 +519,7 @@ bool MESIHandler::handleMessage(Message* msg) {
 	 			* if cacheLineStatus was MODIFIED, need to notify the home node
 	 			* change cacheLineStatus to be INVALID by removing the entry
 	 			*/
-	 			if (cacheLineStatus[addr] == MESIStatus::M) {
+	 			if (cacheLineStatus[addr] == protocolStatus::M) {
 					int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
 					sendMsgToNode(homeNodeId, addr, MessageType::DATA_WRITE_BACK);
 	 			}

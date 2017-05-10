@@ -54,7 +54,7 @@ struct DirectoryEntry
 	DirectoryEntryStatus status;
 };
 
-
+enum protocolStatus {M, E, S, I};
 
 
 

@@ -2,14 +2,13 @@
 #define MESI_HANDLER_HPP
 
 #include "context.hpp"
-enum MESIStatus {M, E, S, I};
 class Context;
 
-class MSIHandler: public ProtocolHandler {
+class MESIHandler: public ProtocolHandler {
 private:
 	Context* myContext;
 	// should match status of local cache
-	std::map<uint64_t, MESIStatus> cacheLineStatus;
+	std::map<uint64_t, protocolStatus> cacheLineStatus;
 	// as home node, how many more INVALIDATE_ACK we need 
 	std::map<uint64_t, int> pendingInvAckCount;
 
