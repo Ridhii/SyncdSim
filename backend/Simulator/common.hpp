@@ -21,6 +21,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <exception>
 #include "../../common/taskLib/Action.hpp"
 #include "../../common/taskLib/Task.hpp"
 #include "../../common/taskLib/TaskGraph.hpp"

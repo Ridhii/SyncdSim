@@ -57,6 +57,9 @@ cache_line& Cache::getLine(uint64_t addr) {
         }
     }
     // throw exception
+
+    std::cerr << "cache line not found, quitting" << std::endl;
+    exit(-1);
 }
 
 
