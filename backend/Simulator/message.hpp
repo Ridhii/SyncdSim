@@ -19,6 +19,7 @@ enum MessageType {CACHE_READ,
 	              	FETCH,
 	              	FETCH_INVALIDATE,
 	              	DATA_VALUE_REPLY,
+	              	DATA_VALUE_REPLY_E,
 	              	DATA_WRITE_BACK
 	              	};
 
