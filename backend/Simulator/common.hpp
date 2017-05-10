@@ -45,7 +45,8 @@ extern char* f;
 extern int nodeLatency;
 extern int cacheLatency;
 
-enum DirectoryEntryStatus {UNCACHED, SHARED, MODIFIED};  // by other processors
+/* EXCLUSIVE is only used in MESI protocol */
+enum DirectoryEntryStatus {UNCACHED, SHARED, MODIFIED, EXCLUSIVE};  // by other processors
 
 struct DirectoryEntry
 {
