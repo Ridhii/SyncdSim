@@ -45,6 +45,12 @@ private:
    	MemOp currentMemOp;
    	bool currentMemOpSuccessful;
 
+   	/* Analysis */
+   	int cacheHit;
+   	int cacheMiss;
+   	/* count of numMsgs sent to other nodes */
+   	int numSentMsgs;
+
 public:
 	Context(int contextId, protocolType protocol, Simulator* simulator);
 	void run();
@@ -79,6 +85,11 @@ public:
 	int getNumContexts();
 
 	void handleMemOpRequest();
+	/* Analysis */
+	void incCacheHit();
+	void incCacheMiss();
+	void incNumSentMsgs();
+	void printContextStats();
 };
 
 
