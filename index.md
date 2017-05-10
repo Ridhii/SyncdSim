@@ -6,6 +6,7 @@ Cache coherence is one of the most important topics in designing multi-processor
 
 # Design
 ## Simulator
+## Context
 ## Processor
 ## Cache
 ## Directory
