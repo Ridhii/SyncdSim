@@ -24,6 +24,8 @@ void MESIHandler::sendMsgToCache(uint64_t addr, MessageType MessageType) {
 	Message* outMsg = new Message(
 						myId, addr, MessageType, cacheLatency);
 	myContext -> addToCacheMsgQueue(outMsg);
+	//cout << "messeging cache for line " << addr << "with type " << MessageType << endl;
+
 }
 
 
@@ -103,6 +105,7 @@ void MESIHandler::handleMemOpRequest() {
 			// cout << "line in a MODIFIED state already!\n" ;
 			Message* outMsg = new Message(myId, addr, MessageType::CACHE_UPDATE, cacheLatency);
 			myContext -> addToCacheMsgQueue(outMsg);
+			//cout << "messeging cache for line " << addr << "with type update" << endl;
 		}
 		/* 
 		*  line found in EXCLUSIVE state
@@ -120,6 +123,8 @@ void MESIHandler::handleMemOpRequest() {
 			Message* outMsg = new Message(myId, addr, MessageType::CACHE_UPDATE, cacheLatency);
 			myContext -> addToCacheMsgQueue(outMsg);
 			cacheLineStatus[addr] = protocolStatus::M;
+			//cout << "messeging cache for line " << addr << "with type update" << endl;
+
 		}
 		return;
 	}
@@ -146,6 +151,8 @@ void MESIHandler::handleMemOpRequest() {
 			Message* outMsg = new Message(
 				myId, addr, MessageType::CACHE_READ, cacheLatency);
 			myContext -> addToCacheMsgQueue(outMsg);
+			//cout << "messeging cache for line " << addr << "with type cache read" << endl;
+
 		}
 
 		return;	
@@ -257,7 +264,8 @@ bool MESIHandler::handleMessage(Message* msg) {
 					// cout << "Home node has recvd an INVALIDATE\n";
 	 				if (homeId == myId) {
 	 					DirectoryEntry entry = myContext -> lookupDirectoryEntry(addr);
-	 					assert(entry.status == DirectoryEntryStatus::SHARED);
+	 					//cout << "in INVALIDATE, directory status is " << entry.status << endl;
+	 					// assert(entry.status == DirectoryEntryStatus::SHARED);
 	 					int sharerId = 0;
 	 					int sharerCount = 0;
 	 					for (bool isSharer : entry.processorMask) {
