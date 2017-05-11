@@ -38,10 +38,66 @@ void Processor::populateMemActionQueue(){
         	break;
         }
     }
+
+	/*==============================BASIC TEST HACK==============================*/
+
+	// assert(currTask != NULL);
+	// printf("in populateMemActionQueue \n");
+	// /* only called to populate the memActionQueue with the 
+	//    currTask's memOps
+	// */
+	// contech::Task::memOpCollection memOps = currTask->getMemOps();
+	// auto iter = memOps.begin();
+	// /* FOR DEBUGGING */
+	// int myID = myContext->getContextId();
+	// uint64_t A0, A1, A2, A3;
+	// A0 = 0x0bcdabcdabcd;
+	// A1 = 0x4bcdabcdabcd;
+	// A2 = 0x8bcdabcdabcd;
+	// A3 = 0xcbcdabcdabcd;
+	// /*
+	// C0: read A2, write A2
+	// C1: read A0, write A0
+	// C2: read A0
+	// C3: write A3
+	// */
+	// if (myID == 0) {
+	// 	contech::MemoryAction action1{(uint64_t)A2,
+ //        		                       (uint64_t)POW_SIZE, 
+ //        		                       (contech::action_type)(contech::action_type_mem_read)};
+ //     	contech::MemoryAction action2{(uint64_t)A2,
+ //        		                       (uint64_t)POW_SIZE, 
+ //        		                       (contech::action_type)(contech::action_type_mem_write)};
+	// 	memActionQueue.push(action1);
+	// 	memActionQueue.push(action2);
+	// }
+	// else if (myID == 1) {
+	// 	contech::MemoryAction action1{(uint64_t)A0,
+ //        		                       (uint64_t)POW_SIZE, 
+ //        		                       (contech::action_type)(contech::action_type_mem_read)};
+ //     	contech::MemoryAction action2{(uint64_t)A0,
+ //        		                       (uint64_t)POW_SIZE, 
+ //        		                       (contech::action_type)(contech::action_type_mem_write)};
+	// 	memActionQueue.push(action1);
+	// 	memActionQueue.push(action2);
+	// }
+	// else if (myID == 2) {
+	// 	contech::MemoryAction action1{(uint64_t)A0,
+ //        		                       (uint64_t)POW_SIZE, 
+ //        		                       (contech::action_type)(contech::action_type_mem_read)};
+ //     	memActionQueue.push(action1);
+	// }
+	// else {
+	// 	contech::MemoryAction action1{(uint64_t)A3,
+ //        		                       (uint64_t)POW_SIZE, 
+ //        		                       (contech::action_type)(contech::action_type_mem_write)};
+ //     	memActionQueue.push(action1);
+	// }
+	
 }
 
 void Processor::run(){
-
+	cout << "mem op queue size is " << memActionQueue.size() << endl;
 	while(myContext->getSuccessful()){
 		//if(numTasksLeft == 39) cout << "entering the while loop in processor.run()\n";
 		myContext->setSuccessful(false);

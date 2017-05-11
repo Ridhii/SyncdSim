@@ -8,6 +8,16 @@ Simulator::Simulator(char* f, protocolType protocol){
 	tg = contech::TaskGraph::initFromFile(f);
 	numContexts = tg -> getNumberOfContexts();
 	numContexts = pow(2, floor(log(numContexts)/log(2))); // round down to nearest power of 2
+   
+
+
+
+    /*==============================BASIC TEST STUFF==============================*/
+    //numContexts = 4;
+
+
+
+
     #ifdef DEBUG
 	printf("Number of rounded contexts is %d \n", numContexts);
 	#endif
@@ -30,6 +40,21 @@ Simulator::Simulator(char* f, protocolType protocol){
 	// mod cid 
 	cid = cid % numContexts;
 	contexts[cid]->addToTaskQueue(firstTask);
+	
+
+
+
+	/*============================== BASIC TEST STUFF ==============================*/
+
+	// contexts[0]->addToTaskQueue(firstTask);
+	// contexts[1]->addToTaskQueue(firstTask);
+	// contexts[2]->addToTaskQueue(firstTask);
+	// contexts[3]->addToTaskQueue(firstTask);
+
+
+
+
+
 	printf("Simulator created\n");
 
 }
@@ -40,8 +65,8 @@ void Simulator::run(){
 	*/
 	while (numUnfinishedTasks > 0) {
 		cycleCount ++;
-		//printf("--------------- Cycle Count %d -------------------------\n", cycleCount);
-		//printf("------------------------------------------------------\n");
+		printf("--------------- Cycle Count %d -------------------------\n", cycleCount);
+		printf("------------------------------------------------------\n");
 		// run all processors and protocolHandlers
 		for (Context* c : contexts){
 			c->run();
@@ -49,7 +74,7 @@ void Simulator::run(){
 			for (contech::Task* t : c->getCompletedTasks()){
 				numUnfinishedTasks --;
 				numTasksLeft --;
-				//printf("******* TASK FINISHED, LEFT %d ********\n", numUnfinishedTasks);
+				printf("******* TASK FINISHED, LEFT %d ********\n", numUnfinishedTasks);
 				std::vector<contech::TaskId> successors = t -> getSuccessorTasks();
 				if (successors.size() != 0) {
 					contech::TaskId predecessorTid = t -> getTaskId();

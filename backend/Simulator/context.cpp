@@ -38,12 +38,20 @@ Context::Context(int _contextId, protocolType _protocol, Simulator* _simulator){
 
 
 void Context::run(){
+<<<<<<< HEAD
 	if(numTasksLeft == 13) cout << "context " << contextId << "starts\n";
+=======
+	cout << "context " << contextId << " starts\n";
+>>>>>>> 97b483c4e25f1de4fe7f3270bbd86ec357893141
 	clearCompletedTasks();
 	cache -> run();
     pH -> checkIncomingMsgQueue();
     processor -> run();
+<<<<<<< HEAD
     if(numTasksLeft == 13) cout << "context " << contextId << "finishes\n";
+=======
+    cout << "context " << contextId << " finishes\n";
+>>>>>>> 97b483c4e25f1de4fe7f3270bbd86ec357893141
 }
 
 
