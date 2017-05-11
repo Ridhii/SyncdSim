@@ -113,7 +113,8 @@ void MESIHandler::handleMemOpRequest() {
 		*/
 
 		else {
-			assert(cacheLineStatus[addr] == protocolStatus::E) // must be in E state
+			cout << "saving invalidation message" << endl;
+			assert(cacheLineStatus[addr] == protocolStatus::E); // must be in E state
 			myContext->incCacheHit();
 			// cout << "line in EXCLUSIVE state, promoting to MODIFIED!\n";
 			Message* outMsg = new Message(myId, addr, MessageType::CACHE_UPDATE, cacheLatency);
@@ -267,8 +268,20 @@ bool MESIHandler::handleMessage(Message* msg) {
 	 						}
 	 						sharerId++;
 	 					}
-	 					pendingInvAckCount.insert(std::pair<uint64_t, int> (addr, sharerCount));
-	 					return false;
+	 					if(sharerCount > 0){
+	 						pendingInvAckCount.insert(std::pair<uint64_t, int> (addr, sharerCount));
+	 						return false;
+	 					}
+	 					/* not sure if below could ever happen, cause if it's true that we are the 
+	 					 * one and only owner, then we would've been in EXCLUSIVE and directly write
+	 					 * to the line, instead of sending out INVALIDATE
+	 					 */ 
+	 				    else{
+	 				    	/* we are the one and only owner */
+	 				    	sendMsgToCache(addr, MessageType::CACHE_UPDATE);
+	 				    	myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus::MODIFIED, srcId);
+	 				    	cacheLineStatus[addr] = protocolStatus::M;
+	 				    }
 	 				}
 	 				else {
 	 					/*
@@ -312,7 +325,7 @@ bool MESIHandler::handleMessage(Message* msg) {
 	 			 * service the first message from the blocked queue
 	 			 * try to go down the queue until blocked again
 				*/
-	 			if (homeId == myId) {
+	 			if (homeId == myId && homeId != srcId) {
 	 				pendingInvAckCount[addr]--;
 	 				if (pendingInvAckCount[addr] == 0) {
 	 					pendingInvAckCount.erase(addr);
