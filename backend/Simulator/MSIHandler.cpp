@@ -68,7 +68,7 @@ void MSIHandler::handleMemOpRequest() {
 	MemOp currOp = myContext -> getMemOp();
 	uint64_t addr = currOp.addr;
 	int myId = myContext -> getContextId();
-     
+    cout << "******** NEW OP REQUEST  FOR CONTEXT " << myContext->getContextId() << "********\n";
     cout << "memory action is " << currOp.actionType << " and" << std::hex << " addr is " << addr << "in context " << myContext->getContextId() << "\n";
 	if (currOp.actionType == contech::action_type::action_type_mem_write) {
 		/* 
@@ -231,7 +231,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 				/* if I am the home node, this request is for me to send out 
 	 				 * further INVALIDATE requests to the sharers except for the sender. 
 					*/
-					//cout << "Home node has recvd an INVALIDATE\n";
+					cout << "Node " << myContext->getContextId() << " has recvd an INVALIDATE\n";
 	 				if (homeId == myId) {
 	 					DirectoryEntry entry = myContext -> lookupDirectoryEntry(addr);
 	 					assert(entry.status == DirectoryEntryStatus::SHARED);
@@ -239,7 +239,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 					int sharerCount = 0;
 	 					for (bool isSharer : entry.processorMask) {
 	 						if (isSharer && srcId != sharerId) {
-	 							//cout << "sending INVALIDATE to sharer " << sharerId << "\n";
+	 							cout << "sending INVALIDATE to sharer " << sharerId << "\n";
 	 							sendMsgToNode(sharerId, addr, MessageType::INVALIDATE);
 	 							sharerCount ++;
 	 						}
