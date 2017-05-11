@@ -35,7 +35,16 @@ int main(int argc, char** argv)
     printf("argc = %d and argv[1] = %s\n", argc, argv[1]);
     if (argc == 5)
     {   
-        protocol = protocolType::MSI; //argv[2s]
+        /* max length of string is 5, should change as more protocols are added!!*/
+        if(std::strncmp(argv[2],"MSI", 5) == 0){
+            cout << "protocol == MSI\n";
+            protocol = protocolType::MSI; //argv[2]
+
+        }
+        else{
+            cout << "protocol == MESI\n";
+            protocol = protocolType::MESI;
+        }
         nodeLatency  = std::atoi(argv[3]);
         cacheLatency = std::atoi(argv[4]);
         #ifdef DEBUG

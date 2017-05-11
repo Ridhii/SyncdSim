@@ -49,6 +49,7 @@ extern int cacheLatency;
 extern const char* mString[];
 // FOR DEBUGGING
 extern int numTasksLeft;
+// FOR DEBUGGING
 extern int taskStarted;
 
 /* EXCLUSIVE is only used in MESI protocol */

@@ -113,7 +113,7 @@ void MESIHandler::handleMemOpRequest() {
 		*/
 
 		else {
-			cout << "saving invalidation message" << endl;
+			//cout << "saving invalidation message" << endl;
 			assert(cacheLineStatus[addr] == protocolStatus::E); // must be in E state
 			myContext->incCacheHit();
 			// cout << "line in EXCLUSIVE state, promoting to MODIFIED!\n";
