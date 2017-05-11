@@ -10,6 +10,7 @@ MESIHandler::~MESIHandler() {
 
 
 void MESIHandler::sendMsgToNode(int dstId, uint64_t addr, MessageType MessageType) {
+	
 	myContext->incNumSentMsgs();
 	int myId = myContext -> getContextId();
 	Message* outMsg = new Message(
@@ -20,6 +21,8 @@ void MESIHandler::sendMsgToNode(int dstId, uint64_t addr, MessageType MessageTyp
 
 
 void MESIHandler::sendMsgToCache(uint64_t addr, MessageType MessageType) {
+
+	myContext->incNumSentMsgsToCache();
 	int myId = myContext -> getContextId();
 	Message* outMsg = new Message(
 						myId, addr, MessageType, cacheLatency);
@@ -30,6 +33,7 @@ void MESIHandler::sendMsgToCache(uint64_t addr, MessageType MessageType) {
 
 
 void MESIHandler::addToBlockedMsgMap(Message* msg) {
+	
 	uint64_t addr = msg -> addr;
 	if (blockedMsgMap.find(addr) != blockedMsgMap.end()) {
 		if (msg->msgType == MessageType::FETCH || msg->msgType == MessageType::FETCH_INVALIDATE) {
@@ -47,6 +51,7 @@ void MESIHandler::addToBlockedMsgMap(Message* msg) {
 }
 
 void MESIHandler::checkBlockedQueueAtAddress(uint64_t addr) {
+	
 	Message* m;
 	while (!blockedMsgMap[addr].empty()) {
 	 	m = blockedMsgMap[addr].front();
@@ -66,6 +71,7 @@ void MESIHandler::checkBlockedQueueAtAddress(uint64_t addr) {
 
 
 void MESIHandler::handleMemOpRequest() {
+	
 	MemOp currOp = myContext -> getMemOp();
 	uint64_t addr = currOp.addr;
 	int myId = myContext -> getContextId();
@@ -117,6 +123,7 @@ void MESIHandler::handleMemOpRequest() {
 
 		else {
 			//cout << "saving invalidation message" << endl;
+			myContext->incEStateCount();
 			assert(cacheLineStatus[addr] == protocolStatus::E); // must be in E state
 			myContext->incCacheHit();
 			// cout << "line in EXCLUSIVE state, promoting to MODIFIED!\n";

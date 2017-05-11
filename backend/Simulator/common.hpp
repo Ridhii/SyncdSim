@@ -34,7 +34,7 @@
 #define ACTION_SIZE 8
 #define POW_SIZE 3
 #define UNFINISHED_TASK_CAP 200
-#define ITER_CAP 10
+#define ITER_CAP 30
 
 enum protocolType { MSI, MESI };
 extern protocolType protocol;

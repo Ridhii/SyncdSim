@@ -152,7 +152,7 @@ bool Cache::updateLine(uint64_t addr, uint64_t* evictionAddr) {
  */
 void Cache::run() {
     std::vector<Message*>& messages = myContext -> getCacheMsgQueue();
-    cout << "cache message queue size: " << messages.size() << endl;
+    //cout << "cache message queue size: " << messages.size() << endl;
     for (Message* msg : messages) {
         if (msg -> latency > 0) {
             msg -> latency--;

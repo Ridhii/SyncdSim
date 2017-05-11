@@ -97,7 +97,7 @@ void Processor::populateMemActionQueue(){
 }
 
 void Processor::run(){
-	cout << "mem op queue size is " << memActionQueue.size() << endl;
+	//cout << "mem op queue size is " << memActionQueue.size() << endl;
 	while(myContext->getSuccessful()){
 		//if(numTasksLeft == 39) cout << "entering the while loop in processor.run()\n";
 		myContext->setSuccessful(false);

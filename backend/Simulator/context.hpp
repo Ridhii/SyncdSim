@@ -51,7 +51,9 @@ private:
    	int cacheMiss;
    	/* count of numMsgs sent to other nodes */
    	int numSentMsgs;
+   	int numSentMsgsToCache;
    	int numInvalidationsSent;
+   	int EStateCount;
 
 public:
 	Context(int contextId, protocolType protocol, Simulator* simulator);
@@ -93,6 +95,8 @@ public:
 	void incNumSentMsgs();
 	void incNumInvalidations();
 	void printContextStats();
+	void incNumSentMsgsToCache();
+	void incEStateCount();
 };
 
 

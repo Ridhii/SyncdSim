@@ -34,8 +34,9 @@ struct Message{
 	MessageType msgType;
 	/* latency of communication */
 	signed latency;
+	bool   serviced;
 	Message(int sid, uint64_t a, MessageType type, signed l) {
-		sourceID = sid; addr = a; msgType = type; latency = l;
+		sourceID = sid; addr = a; msgType = type; latency = l; serviced = false;
 	}
 
 };
