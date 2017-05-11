@@ -51,7 +51,7 @@ void MSIHandler::checkBlockedQueueAtAddress(uint64_t addr) {
 	Message* m;
 	while (!blockedMsgMap[addr].empty()) {
 	 	m = blockedMsgMap[addr].front();
-	 	if (handleMessage(m)) { // not blocked
+	 	if (handleMessage(m, true)) { // not blocked
 	 		blockedMsgMap[addr].erase(blockedMsgMap[addr].begin());
 	 	}	
 	 	else { // message blocked again, rest of the queue remain blocked
@@ -142,7 +142,7 @@ void MSIHandler::handleMemOpRequest() {
 
 
 
-bool MSIHandler::handleMessage(Message* msg) {
+bool MSIHandler::handleMessage(Message* msg, bool blocked) {
 
 	 	MessageType type = msg -> msgType;
 	 	uint64_t addr = msg -> addr;
@@ -162,9 +162,10 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 	switch (type) {
 	 		//=============================== READ_MISS ===============================
 	 		case READ_MISS:
-	 			if (blockedMsgMap.find(addr) == blockedMsgMap.end()) { // not blocked
+	 			if (blockedMsgMap.find(addr) == blockedMsgMap.end() || blocked) { // not blocked
 
 	 				DirectoryEntry entry = myContext -> lookupDirectoryEntry(addr);
+	 			
 	 				if (entry.status == DirectoryEntryStatus::SHARED || 
 	 					entry.status == DirectoryEntryStatus::UNCACHED) {
 	 					sendMsgToNode(srcId, addr, MessageType::DATA_VALUE_REPLY);	 					
@@ -189,7 +190,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 
 	 		//=============================== WRITE_MISS ===============================
 	 		case WRITE_MISS:
-	 			if (blockedMsgMap.find(addr) == blockedMsgMap.end()) {
+	 			if (blockedMsgMap.find(addr) == blockedMsgMap.end() || blocked) {
 	 				//cout << "there is no entry for this address in blockedMsgMap \n" ;
 	 				DirectoryEntry& entry = myContext -> lookupDirectoryEntry(addr);
 	 				if (entry.status == DirectoryEntryStatus::UNCACHED) {
@@ -259,7 +260,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 		 		/* I am the home node, this request is for me to send out 
 	 			*  further INVALIDATE requests to the sharers except for the sender. 
 				*/
-	 			if (blockedMsgMap.find(addr) == blockedMsgMap.end()) {
+	 			if (blockedMsgMap.find(addr) == blockedMsgMap.end() || blocked) {
 	 				DirectoryEntry entry = myContext -> lookupDirectoryEntry(addr);
 	 				assert(entry.status == DirectoryEntryStatus::SHARED);
 	 				int sharerId = 0;
@@ -349,6 +350,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 		    	/* we must have already sent out a DATA_WRITE_BACK due to eviction */
 	 		    	return true;
 	 		    }
+	 		    cout << "line status is currently: " << cacheLineStatus[addr] << endl;
 	 		    assert(cacheLineStatus[addr] == protocolStatus::M);
 				cacheLineStatus[addr] = protocolStatus::S;
 	 			sendMsgToCache(addr, MessageType::CACHE_FETCH);
@@ -527,7 +529,7 @@ void MSIHandler::checkIncomingMsgQueue() {
 	for(i = 0; i < messages.size(); i++){
 		Message* msg = messages[i];
 	    if (msg -> latency == 0) {
-	    	if (!handleMessage(msg)) {
+	    	if (!handleMessage(msg,false)) {
 	    		//printf("adding to blockedMsgMap\n");
 				addToBlockedMsgMap(msg);
 			}
