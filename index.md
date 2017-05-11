@@ -30,6 +30,10 @@ Same argument is applied to cacheMiss. Here comes the interesting part - EStateC
 
 ![alt](backend/Simulator/Images/blackscholes.png)
 
+More comparisons to follow!
+
+TestAndSet vs Test-TestAndSet - To be able to compare the results from test-testAndSet and testAndSet in MESI protocol to see how does the protocolHandler react to different types of reads and writes (in tas we issue a read-modify-write causing invalidations while in ttas we issue a read until invalidated by the owner) we wrote two small cpp files and professor Railing very generously provided us with taskGraphs for those. We are in the process of analysing and generating results from those!
+
 
 
 
