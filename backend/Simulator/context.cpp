@@ -29,19 +29,21 @@ Context::Context(int _contextId, protocolType _protocol, Simulator* _simulator){
 	cacheHit = 0;
 	cacheMiss = 0;
 	numSentMsgs = 0;
+	numSentMsgsToCache = 0;
 	numInvalidationsSent = 0;
+	EStateCount = 0;
 
 
 }
 
 
 void Context::run(){
-	//if(numTasksLeft == 39) cout << "context " << contextId << "starts\n";
+	if(numTasksLeft == 13) cout << "context " << contextId << "starts\n";
 	clearCompletedTasks();
 	cache -> run();
     pH -> checkIncomingMsgQueue();
     processor -> run();
-    //if(numTasksLeft == 39) cout << "context " << contextId << "finishes\n";
+    if(numTasksLeft == 13) cout << "context " << contextId << "finishes\n";
 }
 
 
@@ -152,9 +154,23 @@ void Context::incNumInvalidations(){
 	numInvalidationsSent += 1;
 
 }
+
+void Context::incNumSentMsgsToCache(){
+	numSentMsgsToCache += 1;
+
+}
+
+void Context::incEStateCount(){
+	EStateCount += 1;
+
+}
+
 void Context::printContextStats(){
 	printf("***** CONTEXT ID %d *****\n", contextId);
-	printf(" CacheHits = %d CacheMisses = %d, numSentMsgs = %d, numInvalidationsSent = %d\n", cacheHit, cacheMiss, numSentMsgs, numInvalidationsSent);
+	printf(" CacheHits = %d CacheMisses = %d, numSentMsgs = %d, numInvalidationsSent = %d numSentMsgsToCache = %d\n", cacheHit, cacheMiss, numSentMsgs, numInvalidationsSent, numSentMsgsToCache);
+	if(protocol == protocolType::MESI){
+		printf("EStateCount = %d\n", EStateCount);
+	}
 
 }
 

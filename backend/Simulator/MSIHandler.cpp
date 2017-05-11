@@ -10,6 +10,7 @@ MSIHandler::~MSIHandler() {
 }
 
 void MSIHandler::sendMsgToNode(int dstId, uint64_t addr, MessageType MessageType) {
+	
 	myContext->incNumSentMsgs();
 	int myId = myContext -> getContextId();
 	Message* outMsg = new Message(
@@ -20,6 +21,8 @@ void MSIHandler::sendMsgToNode(int dstId, uint64_t addr, MessageType MessageType
 
 
 void MSIHandler::sendMsgToCache(uint64_t addr, MessageType MessageType) {
+
+	myContext->incNumSentMsgsToCache();
 	int myId = myContext -> getContextId();
 	Message* outMsg = new Message(
 						myId, addr, MessageType, cacheLatency);
@@ -46,6 +49,7 @@ void MSIHandler::addToBlockedMsgMap(Message* msg) {
 }
 
 void MSIHandler::checkBlockedQueueAtAddress(uint64_t addr) {
+	
 	Message* m;
 	while (!blockedMsgMap[addr].empty()) {
 	 	m = blockedMsgMap[addr].front();
@@ -65,10 +69,11 @@ void MSIHandler::checkBlockedQueueAtAddress(uint64_t addr) {
 
 
 void MSIHandler::handleMemOpRequest() {
+	
 	MemOp currOp = myContext -> getMemOp();
 	uint64_t addr = currOp.addr;
 	int myId = myContext -> getContextId();
-    //cout << "******** NEW OP REQUEST  FOR CONTEXT " << myContext->getContextId() << "********\n";
+    //cout << "******** NEW OP REQUEST  FOR CONTEXT " << myContext->getContextId() << " ********\n";
     //cout << "memory action is " << currOp.actionType << " and" << std::hex << " addr is " << addr << "in context " << myContext->getContextId() << "\n";
 	if (currOp.actionType == contech::action_type::action_type_mem_write) {
 		/* 
@@ -126,6 +131,7 @@ void MSIHandler::handleMemOpRequest() {
 		* expect a CACHE_READ_REPLY
 		*/
 		else {
+			//cout << "READ HIT for context " << myContext->getContextId() << "\n";
 			myContext->incCacheHit();
 			Message* outMsg = new Message(
 				myId, addr, MessageType::CACHE_READ, cacheLatency);
@@ -389,12 +395,9 @@ bool MSIHandler::handleMessage(Message* msg) {
 				*
 				* Either way, we update directory entry and check the blocked queue for the line
 	 			*/
-	 			myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus::UNCACHED, srcId);
 	 			if (blockedMsgMap.find(addr) != blockedMsgMap.end()) {
 	 				m = blockedMsgMap[addr].front();
 	 				blockedMsgMap[addr].erase(blockedMsgMap[addr].begin());
-
-	 				// assert - must be either WRITE_MISS or READ_MISS
 	 				assert(m->msgType == MessageType::WRITE_MISS || m->msgType == READ_MISS);
 	 				if (m -> msgType == MessageType::WRITE_MISS) {
 	 					sendMsgToNode(m -> sourceID, addr, MessageType::DATA_VALUE_REPLY);
@@ -404,10 +407,13 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 					sendMsgToNode(m -> sourceID, addr, MessageType::DATA_VALUE_REPLY);	
 	 		 			myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus::SHARED, m -> sourceID); 					
 	 				}
-	 				else {
-	 					// Shouldn't reach here!
-	 				}
 	 				checkBlockedQueueAtAddress(addr);
+	 			}
+	 			else{
+	 				/* if we get a DATA_WRITE_BACK without a READ_MISS or WRITE_MISS, this means 
+	 				   that the owner of this line must have evicted it.
+	 				*/
+	 				myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus::UNCACHED, srcId);
 	 			}
 	 			break;
 
