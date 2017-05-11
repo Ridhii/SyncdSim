@@ -68,8 +68,8 @@ void MSIHandler::handleMemOpRequest() {
 	MemOp currOp = myContext -> getMemOp();
 	uint64_t addr = currOp.addr;
 	int myId = myContext -> getContextId();
-    cout << "******** NEW OP REQUEST  FOR CONTEXT " << myContext->getContextId() << "********\n";
-    cout << "memory action is " << currOp.actionType << " and" << std::hex << " addr is " << addr << "in context " << myContext->getContextId() << "\n";
+    //cout << "******** NEW OP REQUEST  FOR CONTEXT " << myContext->getContextId() << "********\n";
+    //cout << "memory action is " << currOp.actionType << " and" << std::hex << " addr is " << addr << "in context " << myContext->getContextId() << "\n";
 	if (currOp.actionType == contech::action_type::action_type_mem_write) {
 		/* 
 		*  line not found in map -- INVALID 
@@ -91,7 +91,7 @@ void MSIHandler::handleMemOpRequest() {
 			myContext->incCacheHit();
 			myContext->incNumInvalidations();
 			int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
-			cout << "line in a shared state, sending an INVALIDATE to homeNode " << homeNodeId << "\n";
+			//cout << "line in a shared state, sending an INVALIDATE to homeNode " << homeNodeId << "\n";
 			sendMsgToNode(homeNodeId, addr, MessageType::INVALIDATE);
 		}
 		/* 
@@ -145,7 +145,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 	uint64_t addr = msg -> addr;
 	 	int srcId = msg -> sourceID;
 
-	 	cout << "context " << myContext->getContextId() << " recvd a msg " << mString[type] << " from node " << srcId << " for addr " << addr << "\n";
+	 	//cout << "context " << myContext->getContextId() << " recvd a msg " << mString[type] << " from node " << srcId << " for addr " << addr << "\n";
 
 	 	MemOp currOp = myContext -> getMemOp();
 	 	//printf("currOp action is %d  and addr is %llx \n", currOp.actionType, currOp.addr);
@@ -231,7 +231,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 				/* if I am the home node, this request is for me to send out 
 	 				 * further INVALIDATE requests to the sharers except for the sender. 
 					*/
-					cout << "Node " << myContext->getContextId() << " has recvd an INVALIDATE\n";
+					//cout << "Node " << myContext->getContextId() << " has recvd an INVALIDATE\n";
 	 				if (homeId == myId) {
 	 					DirectoryEntry entry = myContext -> lookupDirectoryEntry(addr);
 	 					assert(entry.status == DirectoryEntryStatus::SHARED);
@@ -239,7 +239,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 					int sharerCount = 0;
 	 					for (bool isSharer : entry.processorMask) {
 	 						if (isSharer && srcId != sharerId) {
-	 							cout << "sending INVALIDATE to sharer " << sharerId << "\n";
+	 							//cout << "sending INVALIDATE to sharer " << sharerId << "\n";
 	 							sendMsgToNode(sharerId, addr, MessageType::INVALIDATE);
 	 							sharerCount ++;
 	 						}
@@ -299,27 +299,24 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 			 * service the first message from the blocked queue
 	 			 * try to go down the queue until blocked again
 				*/
-	 			if (homeId == myId) {
+	 			if (homeId == myId && homeId != srcId) {
 	 				pendingInvAckCount[addr]--;
 	 				if (pendingInvAckCount[addr] == 0) {
 	 					pendingInvAckCount.erase(addr);
 	 					Message* m = blockedMsgMap[addr].front();
 	 					blockedMsgMap[addr].erase(blockedMsgMap[addr].begin());
-	 					int srcId = m -> sourceID;
-	 					myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus::MODIFIED, srcId);
+	 					int blockedSrcId = m -> sourceID;
+	 					myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus::MODIFIED, blockedSrcId);
 
 	 					// assert - must be either WRITE_MISS or INVALIDATE
 	 					assert(m->msgType == MessageType::WRITE_MISS || m->msgType == MessageType::INVALIDATE);
 	 					if (m -> msgType == MessageType::WRITE_MISS) {
 	 						//cout << "sending out a DATA_VALUE_REPLY to node " << srcId << "upon receiving all INVALIDATE_ACKS \n";
-	 						sendMsgToNode(srcId, addr, MessageType::DATA_VALUE_REPLY);	 					
+	 						sendMsgToNode(blockedSrcId, addr, MessageType::DATA_VALUE_REPLY);	 					
 	 					} 
 	 					else if (m -> msgType == MessageType::INVALIDATE) {
 	 						//cout << "sending out an INVALIDATE to node " << srcId << "upon receiving all INVALIDATE_ACKS \n";
-	 						sendMsgToNode(srcId, addr, MessageType::INVALIDATE_ACK);	 					
-	 					}
-	 					else {
-	 						// Shouldn't reach here!
+	 						sendMsgToNode(blockedSrcId, addr, MessageType::INVALIDATE_ACK);	 					
 	 					}
 	 					checkBlockedQueueAtAddress(addr);
 	 				}
