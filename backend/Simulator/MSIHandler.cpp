@@ -69,7 +69,7 @@ void MSIHandler::handleMemOpRequest() {
 	uint64_t addr = currOp.addr;
 	int myId = myContext -> getContextId();
      
-    //cout << "memory action is " << currOp.actionType << " and" << std::hex << " addr is " << addr << "\n";
+    cout << "memory action is " << currOp.actionType << " and" << std::hex << " addr is " << addr << "in context " << myContext->getContextId() << "\n";
 	if (currOp.actionType == contech::action_type::action_type_mem_write) {
 		/* 
 		*  line not found in map -- INVALID 
@@ -91,7 +91,7 @@ void MSIHandler::handleMemOpRequest() {
 			myContext->incCacheHit();
 			myContext->incNumInvalidations();
 			int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
-			//cout << "line in a shared state, sending an INVALIDATE to homeNode " << homeNodeId << "\n";
+			cout << "line in a shared state, sending an INVALIDATE to homeNode " << homeNodeId << "\n";
 			sendMsgToNode(homeNodeId, addr, MessageType::INVALIDATE);
 		}
 		/* 
@@ -145,7 +145,7 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 	uint64_t addr = msg -> addr;
 	 	int srcId = msg -> sourceID;
 
-	 	//cout << "recvd a msg " << mString[type] << " from node " << srcId << "\n";
+	 	cout << "context " << myContext->getContextId() << " recvd a msg " << mString[type] << " from node " << srcId << " for addr " << addr << "\n";
 
 	 	MemOp currOp = myContext -> getMemOp();
 	 	//printf("currOp action is %d  and addr is %llx \n", currOp.actionType, currOp.addr);
@@ -245,8 +245,18 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 						}
 	 						sharerId++;
 	 					}
-	 					pendingInvAckCount.insert(std::pair<uint64_t, int> (addr, sharerCount));
-	 					return false;
+	 					if(sharerCount > 0){
+	 						pendingInvAckCount.insert(std::pair<uint64_t, int> (addr, sharerCount));
+	 						return false;
+	 					}
+	 				    else{
+	 				    	/* we are the owner */
+	 				    	sendMsgToCache(addr, MessageType::CACHE_UPDATE);
+	 				    	myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus::MODIFIED, srcId);
+	 				    	cacheLineStatus[addr] = protocolStatus::M;
+
+
+	 				    }
 	 				}
 	 				else {
 	 					/*
@@ -331,7 +341,11 @@ bool MSIHandler::handleMessage(Message* msg) {
 	 		//=============================== FETCH ===============================
 	 		case FETCH:
 	 		    //cout << "recvd a FETCH for addr " << addr << "on contextID " << myContext->getContextId() << "\n";
-	 		    assert(cacheLineStatus.find(addr) == cacheLineStatus.end() || cacheLineStatus[addr] == protocolStatus::M);
+	 		    if(cacheLineStatus.find(addr) == cacheLineStatus.end()){
+	 		    	/* we must have already sent out a DATA_WRITE_BACK due to eviction */
+	 		    	return true;
+	 		    }
+	 		    assert(cacheLineStatus[addr] == protocolStatus::M);
 				cacheLineStatus[addr] = protocolStatus::S;
 	 			sendMsgToCache(addr, MessageType::CACHE_FETCH);
 	 			return false;
@@ -339,7 +353,11 @@ bool MSIHandler::handleMessage(Message* msg) {
 
 	 		//=============================== FETCH_INV ===============================
 	 		case FETCH_INVALIDATE:
-	 		    assert(cacheLineStatus.find(addr) == cacheLineStatus.end() || cacheLineStatus[addr] == protocolStatus::M);
+	 		    if(cacheLineStatus.find(addr) == cacheLineStatus.end()){
+	 		    	/* we must have already sent out a DATA_WRITE_BACK due to eviction */
+	 		    	return true;
+	 		    }
+	 		    assert(cacheLineStatus[addr] == protocolStatus::M);
 	 			cacheLineStatus.erase(addr);
 	 			sendMsgToCache(addr, MessageType::CACHE_INVALIDATE);
 	 			return false;

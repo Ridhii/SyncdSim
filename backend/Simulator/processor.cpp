@@ -1,4 +1,5 @@
 #include "processor.hpp"
+int taskStarted;
 
 Processor::Processor(Context* context){
     
@@ -42,6 +43,7 @@ void Processor::populateMemActionQueue(){
 void Processor::run(){
 
 	while(myContext->getSuccessful()){
+		if(numTasksLeft == 39) cout << "entering the while loop in processor.run()\n";
 		myContext->setSuccessful(false);
 		if (!memActionQueue.empty()) {
 			contech::MemoryAction ma = memActionQueue.front();
@@ -53,7 +55,7 @@ void Processor::run(){
 		}
 		else{
 			if(currTask != NULL){
-				//printf("current task completed, pushing on the completedTaskQueue\n");
+				cout << " ******** CONTEXT " << myContext->getContextId() << " FINISHES IT'S TASK ********\n";
 				myContext->addCompletedTask(currTask);
 				currTask = NULL;
 
@@ -63,6 +65,9 @@ void Processor::run(){
 			myContext->setSuccessful(true);
 			if(currTask != NULL){
 				populateMemActionQueue();
+				if(numTasksLeft == 39) cout << "populateMemActionQueue returns \n";
+				taskStarted += 1;
+				cout << " ******** TASK " << taskStarted << " STARTS IN CONTEXT" << myContext->getContextId() << " ******** \n";
 				continue;
 
 			}

@@ -39,7 +39,7 @@ int main(int argc, char** argv)
         nodeLatency  = std::atoi(argv[3]);
         cacheLatency = std::atoi(argv[4]);
         #ifdef DEBUG
-        printf("taskGraph is %s, node latency is %d and cache latency is %d\n", argv[0], nodeLatency, cacheLatency);
+        printf("taskGraph is %s, node latency is %d and cache latency is %d and ITER_CAP is %d\n", argv[0], nodeLatency, cacheLatency, ITER_CAP);
         #endif
         Simulator simulator = Simulator(argv[1], protocol);
         simulator.run();

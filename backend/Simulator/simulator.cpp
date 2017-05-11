@@ -1,5 +1,5 @@
 #include "simulator.hpp"
-
+int numTasksLeft;
 
 
 Simulator::Simulator(char* f, protocolType protocol){
@@ -16,6 +16,7 @@ Simulator::Simulator(char* f, protocolType protocol){
 	if(UNFINISHED_TASK_CAP <= numUnfinishedTasks){
 		numUnfinishedTasks = UNFINISHED_TASK_CAP;
 	}
+	numTasksLeft = numUnfinishedTasks;
 
 	// initialize contexts
 	for (int i = 0; i < numContexts; ++i){
@@ -47,7 +48,8 @@ void Simulator::run(){
 			// check if a context completed any Tasks in the tick
 			for (contech::Task* t : c->getCompletedTasks()){
 				numUnfinishedTasks --;
-				printf("******* TASK FINISHED, LEFT %d ********\n", numUnfinishedTasks);
+				numTasksLeft --;
+				//printf("******* TASK FINISHED, LEFT %d ********\n", numUnfinishedTasks);
 				std::vector<contech::TaskId> successors = t -> getSuccessorTasks();
 				if (successors.size() != 0) {
 					contech::TaskId predecessorTid = t -> getTaskId();
