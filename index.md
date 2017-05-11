@@ -22,7 +22,9 @@ Since our project is designed to take in a taskGraph file and parse the taskGrap
 
 This approach is useful in getting some basic correctness verified, but it's extremely non-scalable as the complexity grows fast with number of mem ops.
 
+The example mem op sequence and expected behavior of simulator for MESI can be found [here] (https://docs.google.com/document/d/1DDc1RicXqDVquXbJmqvOqBLhzjSF1iNKCU6ISPp7JIg/edit)
 The example mem op sequence and expected behavior of simulator for MESI can be found [here](https://docs.google.com/document/d/1j2hKFtNprdb43laDmoDHZk0d-TV_UeslHpxe_8zuYuM/edit?usp=sharing)
+
 
 # Analysis
 For the analysis we ran a small taskGraph with memOps per task capped at 5 (to be able to finish quickly). However, the analyzation can be extended to any number of memOps per task. Here we see that cacheHits and cacheMisses for both MSI and MESI remain same as irrespective of the fact that a line is found in an exclusive state or modified state in MESI during a write it's still a cacheHit. The other conditions of cacheHit remain same across MSI and MESI and hence this count is same.
