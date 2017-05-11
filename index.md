@@ -15,6 +15,14 @@ Cache coherence is one of the most important topics in designing multi-processor
 ### MESI Handler
 
 # Correctnest Test
+## Basic correctness
+We tested the correctness for both MSI and MESI by creating a small sequence of memory operations for a number of processors. We sketched out the behaviors of each component as well as their communication that we expect to observe during each cycle, and then carefully verifies the result with our simulator output. 
+
+Since our project is designed to take in a taskGraph file and parse the taskGraph for assigning tasks(groups of mem ops) to each processor, we had to do a bit of hacking to "inject" our mem ops into an existing taskGraph, that is to replace the original mem ops in the graph with our own ops. 
+
+This approach is useful in getting some basic correctness verified, but it's extremely non-scalable as the complexity grows fast with number of mem ops.
+
+The example mem op sequence and expected behavior of simulator for MESI can be found [here](https://docs.google.com/document/d/1j2hKFtNprdb43laDmoDHZk0d-TV_UeslHpxe_8zuYuM/edit?usp=sharing)
 
 # Analysis
 
