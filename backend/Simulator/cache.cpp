@@ -97,6 +97,8 @@ void Cache::fetchLine(uint64_t addr) {
  * return value indicates whether eviction occurs.
  */
 bool Cache::updateLine(uint64_t addr, uint64_t* evictionAddr) {
+        // tag | set | block
+
     unsigned tag = addr >> (s+b);
     unsigned set_idx = (addr << t) >> (t+b);
 
@@ -137,9 +139,11 @@ bool Cache::updateLine(uint64_t addr, uint64_t* evictionAddr) {
 
     cache[set_idx][eviction_idx].lru_counter = global_counter ++;
     cache[set_idx][eviction_idx].tag = tag;
-    cache[set_idx][write_idx].dirty = true;
+    cache[set_idx][eviction_idx].dirty = true;
+    cache[set_idx][eviction_idx].valid = true;
 
-    return ((addr << t) >> t) & (evicted_tag << (b + s));
+    *evictionAddr = ((addr << t) >> t) | (evicted_tag << (b + s));
+    return true;
 }
 
 
