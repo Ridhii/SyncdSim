@@ -83,6 +83,7 @@ void MESIHandler::handleMemOpRequest() {
 		*/
 		else if (cacheLineStatus[addr] == protocolStatus::S) {
 			myContext->incCacheHit();
+			myContext->incNumInvalidations();
 			int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
 			cout << "line in a shared state, sending an INVALIDATE to homeNode " << homeNodeId << "\n";
 			sendMsgToNode(homeNodeId, addr, MessageType::INVALIDATE);
@@ -130,7 +131,7 @@ void MESIHandler::handleMemOpRequest() {
 			sendMsgToNode(homeNodeId, addr, MessageType::READ_MISS);
 		}
 		/*
-		* line found in either SHARED, ECLUSIVE, or MODIFIED state
+		* line found in either SHARED, EXCLUSIVE, or MODIFIED state
 		* send a CACHE_READ to local cache
 		* expect a CACHE_READ_REPLY
 		*/

@@ -22,25 +22,23 @@ Context::Context(int _contextId, protocolType _protocol, Simulator* _simulator){
 	// create cache object
 	cache = new Cache(this);
 	currentMemOpSuccessful = true;
-	printf("context %d created \n",contextId);
 
 	cacheHit = 0;
 	cacheMiss = 0;
 	numSentMsgs = 0;
+	numInvalidationsSent = 0;
 
 
 }
 
 
 void Context::run(){
+	//cout << "context " << contextId << "starts\n";
 	clearCompletedTasks();
-	printf("---------------- context run for contextId %d starts \n", contextId);
 	cache -> run();
     pH -> checkIncomingMsgQueue();
-    //printf("checkIncomingMsgQueue finishes run\n");
     processor -> run();
-    //printf("processor finishes run\n");
-    printf("---------------- context run for contextId %d finishes\n", contextId);
+    //cout << "context " << contextId << "finishes\n";
 }
 
 
@@ -147,9 +145,13 @@ void Context::incNumSentMsgs(){
 
 }
 
+void Context::incNumInvalidations(){
+	numInvalidationsSent += 1;
+
+}
 void Context::printContextStats(){
 	printf("***** CONTEXT ID %d *****\n", contextId);
-	printf(" CacheHits = %d CacheMisses = %d, numSentMsgs = %d\n", cacheHit, cacheMiss, numSentMsgs);
+	printf(" CacheHits = %d CacheMisses = %d, numSentMsgs = %d, numInvalidationsSent = %d\n", cacheHit, cacheMiss, numSentMsgs, numInvalidationsSent);
 
 }
 

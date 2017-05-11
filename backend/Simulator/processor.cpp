@@ -16,6 +16,7 @@ void Processor::populateMemActionQueue(){
 	*/
 	contech::Task::memOpCollection memOps = currTask->getMemOps();
 	auto iter = memOps.begin();
+	int index = 0;
 	while (iter != memOps.end()){
         contech::MemoryAction ma = *(iter);
         uint64_t addr = ma.addr;
@@ -30,8 +31,11 @@ void Processor::populateMemActionQueue(){
         	memActionQueue.push(newMemAction);
         }
         iter++;
-        //DEBUGGING
-        break;
+        index++;
+        //FOR DEBUGGING/TESTING
+        if(index == ITER_CAP){
+        	break;
+        }
     }
 }
 
@@ -44,17 +48,17 @@ void Processor::run(){
 			memActionQueue.pop();
 			/* align the ma.addr to cache line size */
 			ma.addr = ma.addr & ALIGNER;
-			cout << "memory action is " << ma.type << " and" << std::hex << " addr is " << ma.addr << "\n";
+			//cout << "memory action is " << ma.type << " and" << std::hex << " addr is " << ma.addr << "\n";
 			myContext->setMemOp(ma.addr, (contech::action_type)ma.type);
 		}
 		else{
 			if(currTask != NULL){
-				printf("current task completed, pushing on the completedTaskQueue\n");
+				//printf("current task completed, pushing on the completedTaskQueue\n");
 				myContext->addCompletedTask(currTask);
 				currTask = NULL;
 
 			}
-			printf("getting the next task \n");
+			//printf("getting the next task \n");
 			currTask = myContext->getNextTask();
 			myContext->setSuccessful(true);
 			if(currTask != NULL){
