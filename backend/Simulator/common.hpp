@@ -34,7 +34,7 @@
 #define ACTION_SIZE 8
 #define POW_SIZE 3
 #define UNFINISHED_TASK_CAP 200
-#define ITER_CAP 4
+#define ITER_CAP 10
 
 enum protocolType { MSI, MESI };
 extern protocolType protocol;
@@ -49,6 +49,7 @@ extern int cacheLatency;
 extern const char* mString[];
 // FOR DEBUGGING
 extern int numTasksLeft;
+extern int taskStarted;
 
 /* EXCLUSIVE is only used in MESI protocol */
 enum DirectoryEntryStatus {UNCACHED, SHARED, MODIFIED, EXCLUSIVE};  // by other processors
