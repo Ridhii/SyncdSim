@@ -5,6 +5,7 @@
 #include "processor.hpp"
 #include "protocolHandler.hpp"
 #include "MSIHandler.hpp"
+#include "MESIHandler.hpp"
 #include "directory.hpp"
 #include "cache.hpp"
 #include "simulator.hpp"

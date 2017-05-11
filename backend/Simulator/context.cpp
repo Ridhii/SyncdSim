@@ -9,6 +9,9 @@ Context::Context(int _contextId, protocolType _protocol, Simulator* _simulator){
     case MSI: 
     	pH = new MSIHandler(this);
     	break;
+    case MESI:
+    	pH = new MESIHandler(this);
+    	break;
     default:
     	pH = new MSIHandler(this);
 	}
