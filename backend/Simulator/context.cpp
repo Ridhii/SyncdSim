@@ -176,6 +176,10 @@ void Context::printContextStats(){
 
 }
 
+void Context::reAddCurrMemOp(){
+	processor->reAddCurrMemOp(currentMemOp.addr, currentMemOp.actionType);
+}
+
 
 
 

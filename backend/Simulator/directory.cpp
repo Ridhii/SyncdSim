@@ -20,6 +20,8 @@ DirectoryEntry& Directory::lookUpEntry(uint64_t addr) {
 
 
 void Directory::updateEntry(uint64_t addr, DirectoryEntryStatus status, int procID) {
+
+	cout << "updating the DirectoryEntry for addr " << std::hex << addr << "with status " << status << "for proc " << procID << "\n";
 	
 	if(directory.find(addr) == directory.end()){
 		DirectoryEntry dirEntry;
