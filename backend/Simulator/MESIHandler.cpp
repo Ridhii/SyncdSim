@@ -117,6 +117,7 @@ void MESIHandler::handleMemOpRequest() {
 		*/
 		else if (cacheLineStatus[addr] == protocolStatus::M){
 			myContext->incCacheHit();
+			myContext->incMStateCount();
 			// cout << "line in a MODIFIED state already!\n" ;
 			Message* outMsg = new Message(myId, addr, MessageType::CACHE_UPDATE, cacheLatency);
 			myContext -> addToCacheMsgQueue(outMsg);

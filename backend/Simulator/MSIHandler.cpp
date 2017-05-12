@@ -114,6 +114,7 @@ void MSIHandler::handleMemOpRequest() {
 		*/
 		else {
 			myContext->incCacheHit();
+			myContext->incMStateCount();
 			//cout << "line in a MODIFIED state already!\n" ;
 			//cout << "sending cache_update for address " << addr << endl;
 			Message* outMsg = new Message(myId, addr, MessageType::CACHE_UPDATE, cacheLatency);
