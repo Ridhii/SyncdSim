@@ -79,6 +79,7 @@ void MSIHandler::handleMemOpRequest() {
 	MemOp currOp = myContext -> getMemOp();
 	uint64_t addr = currOp.addr;
 	int myId = myContext -> getContextId();
+    
     //cout << "********  NEW OP REQUEST  FOR CONTEXT " << myContext->getContextId() << " ********\n";
     //cout << "memory action is " << currOp.actionType << " and" << std::hex << " addr is " << addr << "in context " << myContext->getContextId() << "\n";
 	if (currOp.actionType == contech::action_type::action_type_mem_write) {
@@ -278,10 +279,13 @@ bool MSIHandler::handleMessage(Message* msg, bool blocked) {
 	 				DirectoryEntry entry = myContext -> lookupDirectoryEntry(addr);
 	 				if(entry.status != DirectoryEntryStatus::SHARED){
 	 					
-	 					/* cannot service this INVALIDATE_OTHER as the directory entry is already
-	 					   in modified state and hence somebody else is the owner of this
-	 					   line
-	 					*/
+	 					 /* cannot service this INVALIDATE_OTHER as the directory entry is already
+	 					    in modified state and hence somebody else is the owner of this
+	 					    line
+	 					 */
+	 					//cout << "context" << myContext->getContextId() << "sending a ROLLBACK to node " << srcId << "\n";
+
+	 					sendMsgToNode(srcId, addr, MessageType::ROLLBACK);
 	 					return true;
 	 				}
 	 				assert(entry.status == DirectoryEntryStatus::SHARED);
@@ -464,7 +468,6 @@ bool MSIHandler::handleMessage(Message* msg, bool blocked) {
 	 			*/
 
 	 			assert(opAddr == addr);
-	 			// assert that the addr matches opAddr
 	 			//cout << "received a CACHE_UPDATE_ACK for current request\n";
 	 			myContext -> setSuccessful(true);
 	 			break;
@@ -489,11 +492,6 @@ bool MSIHandler::handleMessage(Message* msg, bool blocked) {
 	 			else if (m -> msgType == MessageType::FETCH_INVALIDATE) {
 	 			    //cout << "recvd a CACHE_INVALIDATE_ACK, sending DATA_WRITE_BACK to node " << m->sourceID << "\n";
 	 				sendMsgToNode(m -> sourceID, addr, MessageType::DATA_WRITE_BACK);	 					
-	 			}
-	 			if(m->addr == opAddr){
-	 				//cout << "invalidating an address, I was trying to read/write to \n";
-	 				myContext->reAddCurrMemOp();
-	 				myContext->setSuccessful(true);
 	 			}
 	 			checkBlockedQueueAtAddress(addr);
 	 			break;
@@ -526,8 +524,14 @@ bool MSIHandler::handleMessage(Message* msg, bool blocked) {
 					sendMsgToNode(homeNodeId, addr, MessageType::DATA_WRITE_BACK);
 	 			}
 	 			cacheLineStatus.erase(addr);
-
 	 			break;
+            //=============================== ROLLBACK ==============================================
+	 		case ROLLBACK:
+ 				//cout << "contextId " << myContext->getContextId() << " received a ROLLBACK from node " << srcId << "\n";
+ 				myContext->reAddCurrMemOp();
+ 				myContext->setSuccessful(true);
+ 				break;
+
 
 	 		default: // UNRECOGNIZED MESSAGE TYPE
 	 			break;

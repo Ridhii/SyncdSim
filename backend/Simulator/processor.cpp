@@ -18,7 +18,6 @@ void Processor::populateMemActionQueue(){
 	*/
 	contech::Task::memOpCollection memOps = currTask->getMemOps();
 	auto iter = memOps.begin();
-	int index = 0;
 	while (iter != memOps.end()){
         contech::MemoryAction ma = *(iter);
         uint64_t addr = ma.addr;
@@ -33,16 +32,12 @@ void Processor::populateMemActionQueue(){
         	memActionQueue.push_back(newMemAction);
         }
         iter++;
-        index++;
-        //FOR DEBUGGING/TESTING
-        if(index == ITER_CAP){
-        	break;
-        }
     }
 }
 
 void Processor::reAddCurrMemOp(uint64_t addr, contech::action_type type){
-
+    
+    //cout << "pushing the currTask back to the front\n";
 	contech::MemoryAction newMemAction{addr,(uint64_t)POW_SIZE, type};
 	memActionQueue.insert(memActionQueue.begin(), newMemAction);
 
