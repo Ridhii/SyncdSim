@@ -44,8 +44,8 @@ Cache::~Cache(){}
 /* Return cache line for the address */
 cache_line& Cache::getLine(uint64_t addr) {
     // tag | set | block
-    unsigned tag = addr >> (s+b);
-    unsigned set_idx = (addr << t) >> (t+b);
+    uint64_t tag = addr >> (s+b);
+    uint64_t set_idx = (addr << t) >> (t+b);
 
     // search all lines in the set with specified index
     for (int i=0; i<E; ++i){
@@ -56,6 +56,7 @@ cache_line& Cache::getLine(uint64_t addr) {
     }
     // throw exception
 
+    // cout << "line not found for addr: " << addr << endl;
     std::cerr << "cache line not found, quitting" << std::endl;
     exit(-1);
 }
@@ -97,8 +98,9 @@ void Cache::fetchLine(uint64_t addr) {
 bool Cache::updateLine(uint64_t addr, uint64_t* evictionAddr) {
         // tag | set | block
 
-    unsigned tag = addr >> (s+b);
-    unsigned set_idx = (addr << t) >> (t+b);
+    // cout << "in cache updateLine method for address: " << addr << endl;
+    uint64_t tag = addr >> (s+b);
+    uint64_t set_idx = (addr << t) >> (t+b);
 
     int write_idx = -1;
     int min_lru = INT_MAX;
@@ -108,32 +110,42 @@ bool Cache::updateLine(uint64_t addr, uint64_t* evictionAddr) {
     for (int i=0; i<E; ++i){
         if(cache[set_idx][i].tag == tag && cache[set_idx][i].valid == true)// cache hit
         { 
+            // cout << "hit lol" << endl;
             cache[set_idx][i].dirty = true;
             cache[set_idx][i].lru_counter = global_counter ++;
-            return false;
+            return false; // no eviction
         }
         else if (cache[set_idx][i].valid == false) { // an empty line to write to
+            // cout << "found empty line to write to" << endl;
             if (write_idx == -1) {
                 write_idx = i;
+                // cout << "got the write idx which is " << write_idx << endl;
+
             }
         }
         else {  // candidate to evict
+            // cout << "candidate to evict" << endl;
             if (cache[set_idx][i].lru_counter < min_lru) {
                 eviction_idx = i;
+                min_lru = cache[set_idx][i].lru_counter;
             }
         }
     }
 
     if (write_idx != -1) {  // found an empty line to write to
+        // cout << "found an empty line to write to and tag is " << tag << " set idx is " << set_idx <<
+        // " write idx is " << write_idx << endl;
         cache[set_idx][write_idx].valid = true;
         cache[set_idx][write_idx].dirty = true;
         cache[set_idx][write_idx].lru_counter = global_counter ++;
         cache[set_idx][write_idx].tag = tag;
         return false;
+        
     }
 
+    // cout << "shouldn't be here..." << endl;
     // eviction
-    unsigned evicted_tag = cache[set_idx][eviction_idx].tag;
+    uint64_t evicted_tag = cache[set_idx][eviction_idx].tag;
 
     cache[set_idx][eviction_idx].lru_counter = global_counter ++;
     cache[set_idx][eviction_idx].tag = tag;
@@ -167,21 +179,26 @@ void Cache::run() {
             switch (msg -> msgType) {
             case CACHE_READ: // request to read a line
                 readLine(addr);
+                // cout << "read line at " << addr << endl;
                 outMsgType = MessageType::CACHE_READ_REPLY;
                 break;
             case CACHE_INVALIDATE: // request to invalidate a line
                 invalidateLine(addr);
+                // cout << "invalidate line at " << addr << endl;
                 outMsgType = MessageType::CACHE_INVALIDATE_ACK;
                 break;
             case CACHE_FETCH:   // request to read and demote a line to shared (reset dirty)
                 fetchLine(addr);
+                // cout << "fetch line at " << addr << endl;
                 outMsgType = MessageType::CACHE_FETCH_ACK;
                 break;
             case CACHE_UPDATE:  // request to write to a line
                 uint64_t evictionAddr;
                 eviction = updateLine(addr, &evictionAddr);
                 outMsgType = MessageType::CACHE_UPDATE_ACK;
+                // cout << "update line at " << addr << endl;
                 if (eviction) {
+                    // cout << "eviction happens!" << endl;
                     Message* evictionAlert = new Message(
                         0, evictionAddr, CACHE_EVICTION_ALERT, cacheLatency);
                     myContext -> addToIncomingMsgQueue(evictionAlert);

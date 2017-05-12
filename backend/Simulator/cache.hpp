@@ -10,8 +10,8 @@ typedef struct
 {
 	bool valid;
 	bool dirty;
-	unsigned tag;
-	int lru_counter;
+	uint64_t tag;
+	int lru_counter = 0;
 } cache_line;
 
 
