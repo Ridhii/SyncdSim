@@ -25,7 +25,7 @@ const char* mString[] = {"CACHE_READ",
                     "FETCH_INVALIDATE",
                     "DATA_VALUE_REPLY",
                     "DATA_VALUE_REPLY_E",
-                    "DATA_WRITE_BACK"
+                    "DATA_WRITE_BACK",
                     "ROLLBACK"
 
   };
