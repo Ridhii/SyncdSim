@@ -19,7 +19,7 @@ public:
 	~MESIHandler();
 	void handleMemOpRequest();
 	void checkIncomingMsgQueue();
-	bool handleMessage(Message* msg);
+	bool handleMessage(Message* msg, bool blocked);
 
 	void sendMsgToNode(int dstId, uint64_t addr, MessageType MessageType);
 	void sendMsgToCache(uint64_t addr, MessageType MessageType);

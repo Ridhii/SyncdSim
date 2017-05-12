@@ -36,7 +36,9 @@ void MESIHandler::addToBlockedMsgMap(Message* msg) {
 	
 	uint64_t addr = msg -> addr;
 	if (blockedMsgMap.find(addr) != blockedMsgMap.end()) {
-		if (msg->msgType == MessageType::FETCH || msg->msgType == MessageType::FETCH_INVALIDATE) {
+		if (msg->msgType == MessageType::FETCH || 
+			msg->msgType == MessageType::FETCH_INVALIDATE ||
+			msg->msgType == MessageType::INVALIDATE) {
 			blockedMsgMap[addr].insert(blockedMsgMap[addr].begin(), msg);
 		}
 		else {
@@ -55,7 +57,11 @@ void MESIHandler::checkBlockedQueueAtAddress(uint64_t addr) {
 	Message* m;
 	while (!blockedMsgMap[addr].empty()) {
 	 	m = blockedMsgMap[addr].front();
-	 	if (handleMessage(m)) { // not blocked
+	 	/* if a message is serviced, then don't service it again */
+	 	if(m->serviced){
+	 		break;
+	 	}
+	 	if (handleMessage(m, true)) { // not blocked
 	 		blockedMsgMap[addr].erase(blockedMsgMap[addr].begin());
 	 	}	
 	 	else { // message blocked again, rest of the queue remain blocked
@@ -71,9 +77,12 @@ void MESIHandler::checkBlockedQueueAtAddress(uint64_t addr) {
 
 
 void MESIHandler::handleMemOpRequest() {
-	
 	MemOp currOp = myContext -> getMemOp();
 	uint64_t addr = currOp.addr;
+
+	cout << "********  NEW OP REQUEST  FOR CONTEXT " << myContext->getContextId() << " ********\n";
+    cout << "memory action is " << currOp.actionType << " and" << std::hex << " addr is " << addr << "in context " << myContext->getContextId() << "\n";
+	
 	int myId = myContext -> getContextId();
 
 	if (currOp.actionType == contech::action_type::action_type_mem_write) {
@@ -98,7 +107,7 @@ void MESIHandler::handleMemOpRequest() {
 			myContext->incNumInvalidations();
 			int homeNodeId = myContext -> getHomeNodeIdByAddr(addr);
 			// cout << "line in a shared state, sending an INVALIDATE to homeNode " << homeNodeId << "\n";
-			sendMsgToNode(homeNodeId, addr, MessageType::INVALIDATE);
+			sendMsgToNode(homeNodeId, addr, MessageType::INVALIDATE_OTHER);
 		}
 		/* 
 		*  line found in MODIFIED state
@@ -169,7 +178,8 @@ void MESIHandler::handleMemOpRequest() {
 
 
 
-bool MESIHandler::handleMessage(Message* msg) {
+bool MESIHandler::handleMessage(Message* msg, bool blocked) {
+	 	assert(msg->serviced == false);
 
 	 	MessageType type = msg -> msgType;
 	 	uint64_t addr = msg -> addr;
@@ -177,10 +187,10 @@ bool MESIHandler::handleMessage(Message* msg) {
 		int homeId = myContext -> getHomeNodeIdByAddr(addr);
 	 	int myId = myContext -> getContextId();
 	 	int numContexts = myContext -> getNumContexts();
-	 	// cout << "recvd a msg " << mString[type] << " from node " << srcId << "\n";
+	 	cout << "Context "<<myId <<" recvd a msg " << mString[type] << " from node " << srcId << "\n";
 
 	 	MemOp currOp = myContext -> getMemOp();
-	 	// printf("currOp action is %d  and addr is %llx \n", currOp.actionType, currOp.addr);
+	 	printf("currOp action is %d  and addr is %llx \n", currOp.actionType, currOp.addr);
 	 	uint64_t opAddr = currOp.addr;
 
 	 	Message* m;
@@ -190,7 +200,8 @@ bool MESIHandler::handleMessage(Message* msg) {
 	 		//=============================== READ_MISS ===============================
 	 		case READ_MISS:
 	 			assert(myId == homeId); // I must be the home node
-	 			if (blockedMsgMap.find(addr) == blockedMsgMap.end()) { // not blocked
+	 			if (blockedMsgMap.find(addr) == blockedMsgMap.end() || blocked) { // not blocked
+	 				msg->serviced = true;
 	 				DirectoryEntry entry = myContext -> lookupDirectoryEntry(addr);
 	 				if (entry.status == DirectoryEntryStatus::SHARED ) {
 	 					sendMsgToNode(srcId, addr, MessageType::DATA_VALUE_REPLY);	 					
@@ -223,11 +234,12 @@ bool MESIHandler::handleMessage(Message* msg) {
 
 	 		//=============================== WRITE_MISS ===============================
 	 		case WRITE_MISS:
-	 			if (blockedMsgMap.find(addr) == blockedMsgMap.end()) {
-	 				// cout << "there is no entry for this address in blockedMsgMap \n" ;
+	 			if (blockedMsgMap.find(addr) == blockedMsgMap.end() || blocked) {
+	 				msg->serviced = true;
+	 				cout << "there is no entry for this address in blockedMsgMap \n" ;
 	 				DirectoryEntry& entry = myContext -> lookupDirectoryEntry(addr);
 	 				if (entry.status == DirectoryEntryStatus::UNCACHED) {
-	 					// cout << "sending a DATA_VALUE_REPLY to node" << srcId << "\n";
+	 					cout << "sending a DATA_VALUE_REPLY to node" << srcId << "\n";
 	 					sendMsgToNode(srcId, addr, MessageType::DATA_VALUE_REPLY);	 					
 	 					myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus::MODIFIED, srcId);
 	 				} 
@@ -245,14 +257,14 @@ bool MESIHandler::handleMessage(Message* msg) {
 	 					return false;
 	 				}
 	 				else {	// MODIFIED OR EXCLUSIVE
-	 					// printf("directory entry is already MODIFIED or EXCLUSIVE\n");
+	 					printf("directory entry is already MODIFIED or EXCLUSIVE\n");
 	 					int ownerId = 0;
 	 					for (int isOwner : entry.processorMask) {
 	 						if (isOwner)	break;
 	 						ownerId++;
 	 					}
 	 					assert(ownerId < numContexts);
-	 					// cout << "sending a FETCH_INVALIDATE to ownerId " << ownerId << "\n";
+	 					cout << "sending a FETCH_INVALIDATE to ownerId " << ownerId << "\n";
 	 				    sendMsgToNode(ownerId, addr, MessageType::FETCH_INVALIDATE);
 	 					return false;
 	 				}
@@ -264,62 +276,73 @@ bool MESIHandler::handleMessage(Message* msg) {
 
 	 		//=============================== INVALIDATE ===============================
 	 		case INVALIDATE:
-	 			if (blockedMsgMap.find(addr) == blockedMsgMap.end()) {
-	 				/* if I am the home node, this request is for me to send out 
-	 				 * further INVALIDATE requests to the sharers except for the sender. 
-					*/
-					// cout << "Home node has recvd an INVALIDATE\n";
-	 				if (homeId == myId) {
-	 					DirectoryEntry entry = myContext -> lookupDirectoryEntry(addr);
-	 					//cout << "in INVALIDATE, directory status is " << entry.status << endl;
-	 					// assert(entry.status == DirectoryEntryStatus::SHARED);
-	 					int sharerId = 0;
-	 					int sharerCount = 0;
-	 					for (bool isSharer : entry.processorMask) {
-	 						if (isSharer && srcId != sharerId) {
-	 							// cout << "sending INVALIDATE to sharer " << sharerId << "\n";
-	 							sendMsgToNode(sharerId, addr, MessageType::INVALIDATE);
-	 							sharerCount ++;
-	 						}
-	 						sharerId++;
-	 					}
-	 					if(sharerCount > 0){
-	 						pendingInvAckCount.insert(std::pair<uint64_t, int> (addr, sharerCount));
-	 						return false;
-	 					}
-	 					/* not sure if below could ever happen, cause if it's true that we are the 
-	 					 * one and only owner, then we would've been in EXCLUSIVE and directly write
-	 					 * to the line, instead of sending out INVALIDATE
-	 					 */ 
-	 				    else{
-	 				    	/* we are the one and only owner */
-	 				    	sendMsgToCache(addr, MessageType::CACHE_UPDATE);
-	 				    	myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus::MODIFIED, srcId);
-	 				    	cacheLineStatus[addr] = protocolStatus::M;
-	 				    }
+	 			/*the request is for me to invalidate 
+		 		* my cache line and ACK
+		 		*	
+		 		* It's possible for the line to be INVALID in my own cache due to
+		 		* eviction. In that case, just send ACK right away
+		 		*/
+		 		assert(srcId == homeId);
+		 		if (cacheLineStatus.find(addr) == cacheLineStatus.end()) { // invalid
+		 			//cout << " The line is not in my cache due to eviction, sending an INVALIDATE_ACK right away \n";
+		 			sendMsgToNode(srcId, addr, MessageType::INVALIDATE_ACK);
+		 		}
+		 		else { 
+		 			/* needs to ask cache to invalidate the line and 
+		 			 * remove the entry from cacheLineStatus to indicate an INVALID status
+		 			 */
+		 			cout << "sending a CACHE_INVALIDATE to cache and removing the entry from cacheLineStatus\n";
+		 			cacheLineStatus.erase(addr);
+		 			sendMsgToCache(addr, MessageType::CACHE_INVALIDATE);
+		 			msg->serviced = true;
+		 			return false;
+		 		}
+		 		
+		 		break;
+
+
+			//=============================== INVALIDATE_OTHER ===============================
+		 	case INVALIDATE_OTHER:
+		 		assert(homeId == myId);
+		 		/* I am the home node, this request is for me to send out 
+	 			*  further INVALIDATE requests to the sharers except for the sender. 
+				*/
+	 			if (blockedMsgMap.find(addr) == blockedMsgMap.end() || blocked) {
+	 				
+					cout << "Home node has recvd an INVALIDATE_OTHER\n";
+	 				msg->serviced = true;
+	 				DirectoryEntry entry = myContext -> lookupDirectoryEntry(addr);
+	 				if(entry.status != DirectoryEntryStatus::SHARED){
+	 					
+	 					 /* cannot service this INVALIDATE_OTHER as the directory entry is already
+	 					    in modified state and hence somebody else is the owner of this
+	 					    line
+	 					 */
+	 					cout << "context" << myContext->getContextId() << "sending a ROLLBACK to node " << srcId << "\n";
+
+	 					sendMsgToNode(srcId, addr, MessageType::ROLLBACK);
+	 					return true;
 	 				}
-	 				else {
-	 					/*
-		 				 * if I am not the home node, the request is for me to invalidate 
-		 				 * my cache line and ACK
-		 				 *	
-		 				 * It's possible for the line to be INVALID in my own cache due to
-		 				 * eviction. In that case, just send ACK right away
-		 				 */
-	 					// cout << "I am the owner of a cache line for the INVALIDATE \n";
-		 				if (cacheLineStatus.find(addr) == cacheLineStatus.end()) { // invalid
-		 					// cout << " The line is not in my cache due to eviction, sending an INVALIDATE_ACK right away \n";
-		 					sendMsgToNode(srcId, addr, MessageType::INVALIDATE_ACK);
-		 				}
-		 				else { 
-		 					/* needs to ask cache to invalidate the line and 
-		 					 * remove the entry from cacheLineStatus to indicate an INVALID status
-		 					 */
-		 					// cout << "sending a CACHE_INVALIDATE to cache and removing the entry from cacheLineStatus\n";
-		 					cacheLineStatus.erase(addr);
-		 					sendMsgToCache(addr, MessageType::CACHE_INVALIDATE);
-		 					return false;
-		 				}
+	 				cout << "in INVALIDATE, directory status is " << entry.status << endl;
+	 				assert(entry.status == DirectoryEntryStatus::SHARED);
+	 				int sharerId = 0;
+	 				int sharerCount = 0;
+	 				for (bool isSharer : entry.processorMask) {
+	 					if (isSharer && srcId != sharerId) {
+	 						cout << "sending INVALIDATE to sharer " << sharerId << "\n";
+	 						sendMsgToNode(sharerId, addr, MessageType::INVALIDATE);
+	 						sharerCount ++;
+	 					}
+	 					sharerId++;
+	 				}
+	 				if(sharerCount > 0){
+	 					pendingInvAckCount.insert(std::pair<uint64_t, int> (addr, sharerCount));
+	 					return false;
+	 				}
+	 				else{
+	 				     /* There is only one sharer that is the requester, reply to it immediately */
+	 				    myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus::MODIFIED, srcId);
+	 				    sendMsgToNode(srcId, addr, MessageType::INVALIDATE_OTHER_ACK);	
 	 				}
 	 			}
 	 			else {
@@ -332,7 +355,7 @@ bool MESIHandler::handleMessage(Message* msg) {
 	 		case INVALIDATE_ACK:
 	 			
 	 			/* 
-	 			 * if I am the home node, this ACK is from a sharer of the line 
+	 			 * I am the home node, this ACK is from a sharer of the line 
 	 			 * decrement the count from pendingInvAckCount
 	 			 * if reaches 0, 
 	 			 * remove entry from pendingInvAckCount
@@ -340,44 +363,46 @@ bool MESIHandler::handleMessage(Message* msg) {
 	 			 * service the first message from the blocked queue
 	 			 * try to go down the queue until blocked again
 				*/
-	 			if (homeId == myId && homeId != srcId) {
-	 				pendingInvAckCount[addr]--;
-	 				if (pendingInvAckCount[addr] == 0) {
-	 					pendingInvAckCount.erase(addr);
-	 					m = blockedMsgMap[addr].front();
-	 					blockedMsgMap[addr].erase(blockedMsgMap[addr].begin());
-	 					int src = m -> sourceID;
-	 					myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus::MODIFIED, src);
+	 			assert(homeId == myId);
+	 			pendingInvAckCount[addr]--;
+	 			if (pendingInvAckCount[addr] == 0) {
+	 				pendingInvAckCount.erase(addr);
+	 				m = blockedMsgMap[addr].front();
+	 				blockedMsgMap[addr].erase(blockedMsgMap[addr].begin());
+	 				int src = m -> sourceID;
+	 				myContext -> updateDirectoryEntry(addr, DirectoryEntryStatus::MODIFIED, src);
 
-	 					// assert - must be either WRITE_MISS or INVALIDATE
-	 					assert(m->msgType == MessageType::WRITE_MISS || m->msgType == MessageType::INVALIDATE);
-	 					if (m -> msgType == MessageType::WRITE_MISS) {
-	 						// cout << "sending out a DATA_VALUE_REPLY to node " << src << "upon receiving all INVALIDATE_ACKS \n";
-	 						sendMsgToNode(src, addr, MessageType::DATA_VALUE_REPLY);	 					
-	 					} 
-	 					else if (m -> msgType == MessageType::INVALIDATE) {
-	 						// cout << "sending out an INVALIDATE to node " << srcId << "upon receiving all INVALIDATE_ACKS \n";
-	 						sendMsgToNode(src, addr, MessageType::INVALIDATE_ACK);	 					
-	 					}
-	 					else {
-	 						// Shouldn't reach here!
-	 					}
-	 					checkBlockedQueueAtAddress(addr);
+	 				// assert - must be either WRITE_MISS or INVALIDATE
+	 				assert(m->msgType == MessageType::WRITE_MISS || m->msgType == MessageType::INVALIDATE);
+	 				if (m -> msgType == MessageType::WRITE_MISS) {
+	 					cout << "sending out a DATA_VALUE_REPLY to node " << src << "upon receiving all INVALIDATE_ACKS \n";
+	 					sendMsgToNode(src, addr, MessageType::DATA_VALUE_REPLY);	 					
+	 				} 
+	 				else if (m -> msgType == MessageType::INVALIDATE_OTHER) {
+	 					cout << "sending out an INVALIDATE to node " << srcId << "upon receiving all INVALIDATE_ACKS \n";
+	 					sendMsgToNode(src, addr, MessageType::INVALIDATE_OTHER_ACK);	 					
 	 				}
+	 					
+	 				checkBlockedQueueAtAddress(addr);
+	 				
 	 			}
+	 			break;
+
+	 		//=============================== INVALIDATE_OTHER_ACK ===============================
+	 		case INVALIDATE_OTHER_ACK:
 	 			/* 
-	 			 * if I am not the home node, this ACK must be from the home node 
-	 			 * telling me that I can proceed to writing the line
+	 			 * this ACK must be from the home node 
+	 			 * telling me that processor can proceed to writing the line
 	 			 * modify cacheLineStatus and send cache an UPDATE message 
 	 			 * 
 	 			 * Note that we'll wait for CACHE_UPDATE_ACK to set successful to true
 				*/
-	 			else {
-	 				// cout << "received an INVALIDATE_ACK for my curr request\n";
-	 				assert(currOp.actionType == contech::action_type::action_type_mem_write);
-	 				cacheLineStatus[addr] = protocolStatus::M;
-	 				sendMsgToCache(addr, MessageType::CACHE_UPDATE);
-	 			}
+	 			assert(srcId == homeId);
+	 			assert(opAddr == addr);
+	 			cacheLineStatus[addr] = protocolStatus::M;
+	 			sendMsgToCache(addr, MessageType::CACHE_UPDATE);
+	 			cout << "sending cache_update for address " << addr << endl;
+
 	 			break;
 
 	 		//=============================== FETCH ===============================
@@ -395,6 +420,7 @@ bool MESIHandler::handleMessage(Message* msg) {
 					cacheLineStatus[addr] == protocolStatus::E);
 				cacheLineStatus[addr] = protocolStatus::S;
 	 			sendMsgToCache(addr, MessageType::CACHE_FETCH);
+	 			msg -> serviced = true;
 	 			return false;
 	 			break;
 
@@ -409,6 +435,7 @@ bool MESIHandler::handleMessage(Message* msg) {
 					cacheLineStatus[addr] == protocolStatus::E);
 	 			cacheLineStatus.erase(addr);
 	 			sendMsgToCache(addr, MessageType::CACHE_INVALIDATE);
+	 			msg -> serviced = true;
 	 			return false;
 	 			break;
 
@@ -429,7 +456,7 @@ bool MESIHandler::handleMessage(Message* msg) {
 				else { // if a READ_MISS
 					cacheLineStatus.insert(std::pair<uint64_t, protocolStatus> (addr,protocolStatus::S));
 				}
-				// cout << "recvd a DATA_VALUE_REPLY, update the cache \n";
+				cout << "recvd a DATA_VALUE_REPLY, update the cache \n";
 				sendMsgToCache(addr, MessageType::CACHE_UPDATE);
 	 			break;
 
@@ -444,7 +471,7 @@ bool MESIHandler::handleMessage(Message* msg) {
 	 			assert(myContext->getSuccessful() == false);
 	 			assert(currOp.actionType == contech::action_type::action_type_mem_read);
 	 			cacheLineStatus.insert(std::pair<uint64_t, protocolStatus> (addr,protocolStatus::E));
-	 			// cout << "recvd a DATA_VALUE_REPLY_E, update the cache \n";
+	 			cout << "recvd a DATA_VALUE_REPLY_E, update the cache \n";
 	 			sendMsgToCache(addr, MessageType::CACHE_UPDATE);
 
 	 			break;
@@ -523,11 +550,11 @@ bool MESIHandler::handleMessage(Message* msg) {
 	 			assert(m->msgType == MessageType::INVALIDATE || 
 	 				m->msgType == MessageType::FETCH_INVALIDATE);
 	 			if (m -> msgType == MessageType::INVALIDATE) {
-	 				// cout << "recvd a CACHE_INVALIDATE_ACK, sending INVALIDATE_ACK to node " << m->sourceID << "\n";
+	 				cout << "recvd a CACHE_INVALIDATE_ACK, sending INVALIDATE_ACK to node " << m->sourceID << "\n";
 	 				sendMsgToNode(m -> sourceID, addr, MessageType::INVALIDATE_ACK);	 					
 	 			} 
 	 			else if (m -> msgType == MessageType::FETCH_INVALIDATE) {
-	 			    // cout << "recvd a CACHE_INVALIDATE_ACK, sending DATA_WRITE_BACK to node " << m->sourceID << "\n";
+	 			    cout << "recvd a CACHE_INVALIDATE_ACK, sending DATA_WRITE_BACK to node " << m->sourceID << "\n";
 	 				sendMsgToNode(m -> sourceID, addr, MessageType::DATA_WRITE_BACK);	 					
 	 			}
 	 			checkBlockedQueueAtAddress(addr);
@@ -564,6 +591,15 @@ bool MESIHandler::handleMessage(Message* msg) {
 
 	 			break;
 
+
+	 		//=============================== ROLLBACK ==============================================
+	 		case ROLLBACK:
+ 				cout << "contextId " << myContext->getContextId() << " received a ROLLBACK from node " << srcId << "\n";
+ 				myContext->reAddCurrMemOp();
+ 				myContext->setSuccessful(true);
+ 				break;
+
+
 	 		default: // UNRECOGNIZED MESSAGE TYPE
 	 			break;
 
@@ -590,7 +626,7 @@ void MESIHandler::checkIncomingMsgQueue() {
 	for(i = 0; i < messages.size(); i++){
 		Message* msg = messages[i];
 	    if (msg -> latency == 0) {
-	    	if (!handleMessage(msg)) {
+	    	if (!handleMessage(msg, false)) {
 	    		// printf("adding to blockedMsgMap\n");
 				addToBlockedMsgMap(msg);
 			}
