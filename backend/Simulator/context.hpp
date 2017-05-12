@@ -97,6 +97,7 @@ public:
 	void printContextStats();
 	void incNumSentMsgsToCache();
 	void incEStateCount();
+	void reAddCurrMemOp();
 };
 
 
