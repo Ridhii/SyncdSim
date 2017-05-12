@@ -32,6 +32,7 @@ Context::Context(int _contextId, protocolType _protocol, Simulator* _simulator){
 	numSentMsgsToCache = 0;
 	numInvalidationsSent = 0;
 	EStateCount = 0;
+	MStateCount = 0;
 
 
 }
@@ -167,12 +168,18 @@ void Context::incEStateCount(){
 
 }
 
+void Context::incMStateCount(){
+	MStateCount += 1;
+
+}
+
 void Context::printContextStats(){
 	printf("***** CONTEXT ID %d *****\n", contextId);
-	printf(" CacheHits = %d CacheMisses = %d, numSentMsgs = %d, numInvalidationsSent = %d numSentMsgsToCache = %d\n", cacheHit, cacheMiss, numSentMsgs, numInvalidationsSent, numSentMsgsToCache);
+	printf(" CacheHits = %d CacheMisses = %d, numSentMsgs = %d, numInvalidationsSent = %d numSentMsgsToCache = %d ", cacheHit, cacheMiss, numSentMsgs, numInvalidationsSent, numSentMsgsToCache);
 	if(protocol == protocolType::MESI){
-		printf("EStateCount = %d\n", EStateCount);
+		printf("EStateCount = %d ", EStateCount);
 	}
+	printf("MStateCount = %d\n", MStateCount);
 
 }
 

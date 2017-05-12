@@ -54,6 +54,7 @@ private:
    	int numSentMsgsToCache;
    	int numInvalidationsSent;
    	int EStateCount;
+   	int MStateCount;
 
 public:
 	Context(int contextId, protocolType protocol, Simulator* simulator);
@@ -97,6 +98,7 @@ public:
 	void printContextStats();
 	void incNumSentMsgsToCache();
 	void incEStateCount();
+	void incMStateCount();
 	void reAddCurrMemOp();
 };
 
