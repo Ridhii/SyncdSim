@@ -19,3 +19,4 @@ $(PROJECT): $(OBJECTS)
 
 clean:
 	rm $(OBJECTS) $(PROJECT)
+	rm *.txt
