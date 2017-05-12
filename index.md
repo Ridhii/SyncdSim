@@ -24,7 +24,7 @@ This approach is useful in getting some basic correctness verified, but it's ext
 
 The example mem op sequence and expected behavior of simulator for MESI can be found [here https://docs.google.com/a/andrew.cmu.edu/document/d/1DDc1RicXqDVquXbJmqvOqBLhzjSF1iNKCU6ISPp7JIg/edit?usp=sharing] 
 
-The example mem op sequence and expected behavior of simulator for MESI can be found [here](https://docs.google.com/document/d/1j2hKFtNprdb43laDmoDHZk0d-TV_UeslHpxe_8zuYuM/edit?usp=sharing)
+The example mem op sequence and expected behavior of simulator for MESI can be found [here https://docs.google.com/document/d/1j2hKFtNprdb43laDmoDHZk0d-TV_UeslHpxe_8zuYuM/edit?usp=sharing]
 
 
 # Analysis
