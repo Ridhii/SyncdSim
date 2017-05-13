@@ -23,10 +23,11 @@ Each context refers to a set of directory, cache, processor and protocol handler
 ## Processor
 Processor is responsible for getting memory operations from a Task. It keeps a queue of MemoryAction objects that contain an address and an associated memory action type (e.g. a action_type_mem_read), and feeds the memory actions to protocol handler one at a time, and only when the previous memory action has finished. When the queue runs empty, the processor tries to fetch a new Task if one is available, and pre-processes the address of a memory action to be 64-byte aligned (which is the size of a cache line). In the case when a memory address spans two lines, processor will split that Memory Action into two, that have identical memory action types.
 
+## Directory
+Each context has its own directory which follows a full bit vector directory representation to keep track of all the sharers/owner of a cache line in its memory. It supports the lookup and update operations to maintain the state of a cache line across the entire system.
+
 ## Cache
 Our Cache supports configurable number of sets as well as associativity. Cache keeps a message queue and all messages are from local Protocol Handler, requesting to read a line, update (add/modify) a line, or invalidate a line. Cache will take request one by one, fulfill it, and ACK back to the Protocol Handler by adding to its incoming message queue. When eviction happens during an update, the Cache uses LRU policy to select a victim, and notify the Protocol Handler who could then change the cache line status accordingly.
-
-## Directory
 
 ## Protocol Handler
 Protocol Handler knows well about the protocol and its state transitions. It talks to Directory, Cache, and other nodes in order to service a MemoryAction from its own processor, or a message from its incoming message queue. 
