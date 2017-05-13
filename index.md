@@ -74,7 +74,7 @@ When the home node is the also the owner of the line in a modified/exclusive sta
 ## TestAndSet vs Test-TestAndSet 
 
 The following chart represents information about the statistics we collected for taskGraphs that represented programs we wrote that represented test and set and test - test and set schemes.
-![alt](https://github.com/Ridhii/SyncdSim/blob/master/backend/Simulator/Images/tasVsttas.png)
+![alt](https://docs.google.com/spreadsheets/d/1mlZ6T5cp2SBJoPPTkUOryMt7OcYKStOP04-qHtGQw9w/pubchart?oid=789836495&format=image)
 
 Clarification on the x-axis labels : 
 
