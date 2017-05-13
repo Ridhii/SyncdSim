@@ -65,8 +65,6 @@ TestAndSet vs Test-TestAndSet
 
 The following chart represents information about the statistics we collected for taskGraphs that represented programs we wrote that represented test and set and test - test and set schemes.
 ![alt](backend/Simulator/Images/tasVsttas.png)
-![alt](backend/Simulator/Images/shortTas.png)
-![alt](backend/Simulator/Images/ttas.png)
 
 Clarification on the x-axis labels : 
 #msg sent to other nodes - represents the number of times a context sent a message to another context to request a certain service (like service a READ_MISS etc). 
