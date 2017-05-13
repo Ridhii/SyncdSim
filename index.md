@@ -59,7 +59,7 @@ The example mem op sequence and expected behavior of simulator for MESI can be f
 TestAndSet vs Test-TestAndSet 
 
 The following chart represents information about the statistics we collected for taskGraphs that represented programs we wrote that represented test and set and test - test and set schemes.
-![alt][https://github.com/Ridhii/SyncdSim/blob/master/backend/Simulator/Images/tasVsttas.png]
+![alt](https://github.com/Ridhii/SyncdSim/blob/master/backend/Simulator/Images/tasVsttas.png)
 
 Clarification on the x-axis labels : 
 
