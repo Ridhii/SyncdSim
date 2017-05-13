@@ -61,9 +61,30 @@ Same argument is applied to cacheMiss. Here comes the interesting part - EStateC
 
 ![alt](backend/Simulator/Images/blackscholes.png)
 
-More comparisons to follow!
+TestAndSet vs Test-TestAndSet 
 
-TestAndSet vs Test-TestAndSet - To be able to compare the results from test-testAndSet and testAndSet in MESI protocol to see how does the protocolHandler react to different types of reads and writes (in tas we issue a read-modify-write causing invalidations while in ttas we issue a read until invalidated by the owner) we wrote two small cpp files and professor Railing very generously provided us with taskGraphs for those. We are in the process of analysing and generating results from those!
+The following chart represents information about the statistics we collected for taskGraphs that represented programs we wrote that represented test and set and test - test and set schemes.
+Clarification on the x-axis labels : 
+#msg sent to other nodes - represents the number of times a context sent a message to another context to request a certain service (like service a READ_MISS etc). 
+#write to E represents the total number of times the contexts wrote to a line in an Exclusive state and #write to M represents the total number of times all the contexts wrote to a line in a Modified state.
+#invalidations sent means the total number of times all the contexts wrote to a line in a shared state and sent the home node an invalidation request.
+
+
+The simulator takes in the taskgraphs generated for the test and set and test-test and set programs and simulates the memory operations in each task in a task dependent order. The following are the taskgraphs for test and set and test-test and set and will help understand the above graph better. 
+
+Cache Hits and Misses - Looking at tas.png we see that test and set is sequential in the middle. Context 3 loads the line in a shared state and invalidates it when trying to write to it. After that no context contends for that line for a while and hence context 3 has a cache hit everytime it tries to access the line during it’s sequential access. Same behavior is seen with context 0 and hence both of them have a large number of cache hits. The sequential nature of the taskgraph also explains why test and set has more cache hits than cache misses.
+The ttas.png suggests that the number of tasks in test-test and set is much lesser than that in test and set. This combined with the fact the test-test and set is much more parallel suggests that contexts in test - test and set setting have lesser cache hits. Since, all the contexts execute in parallel most of the program time, a context will likely not have a line in a shared/modified/exclusive state more than a few clock cycles and hence incurs more misses than hits.
+
+Number of messages sent to other nodes/contexts - The test and set taskgraph has a larger number of messages sent to other nodes because of two reasons - first it has a larger number of tasks and hence has more memory operations that lead to more messages sent across the interconnect. Secondly, because test and set reads directly from the memory, it requires more communication to invalidate/fetch/fetch-invalidate the line than test - test and set.
+Test - test and set has a lesser number of messages sent across the interconnect as it has a  fewer number of tasks and hence sends out a lesser number of messages and secondly, since tasks in test - test and set only issue invalidations upon unlocking and not while reading a line in a shared state in their cache.
+
+Number of invalidations sent - Both test and set and test - test and set send out invalidations, however number is more in test and set because of the higher number of memory operations and read-modify-write intentions issued which result in invalidation of the line in other contexts.
+
+Number of writes in an Exclusive state : When test and set and test - test and set are simulated with MESI protocol, contexts do load a line in an exclusive state however because of the contentious nature of the program, that line is brought down to a shared state by a second context trying to read from it too, and hence neither of the program have the benefit of writing to a line in an exclusive state. However, as you will see with taskgraphs of larger sizes with less contention, a line loaded in an exclusive state can be written to without incurring the overhead of communicating with other contexts.
+
+Number of writes in a modified state : For test and set, context 0 and context 3 execute sequentially for a good portion of program time and hence keep writing to a line in a modified state in their cache without any contention and hence the number is high for test and set. Infact, it’s the write - modified hit count that is a major contributor to the the total cache hits of test and set.
+Test - test and set has zero writes to a line in a modified state as the contexts either read to a line in a shared state and when the lock holder unlocks the lock and invalidates the line, the next holder of the line gets the line in a modified state and immediately writes to it and finishes the task. Thus, the contexts in test - test and set never issue an intention to write and fail in doing so - they either read the line in a shared state or when the line is invalidated, load and write to it and then finish while the rest of the contexts have the line in an invalid state.
+
 
 
 
