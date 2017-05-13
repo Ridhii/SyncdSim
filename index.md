@@ -2,21 +2,28 @@
 Syncdsim is a directory-based cache coherence simulator that supports MSI and MESI (more to come). It takes in memory reference traces, simulates cache and directory traffic, and finally analyzes/reports the behaviors. 
 
 # Background
+
 ## Motivation
 Cache coherence is one of the most important topics in designing multi-processor caches. In the lectures, we discussed both snooping-based and directory-based cache coherence protocols. Comparing to snooping-based which relies heavily on broadcasting on the entire bus, directory-based protocols seems to be more scalable with regard to number of processors as it allows point-to-point communication. Therefore, we decide to develop a deeper understanding of the various directory-based cache coherence protocols by actually implementing them and observe cache behavior of programs with distinct memory traces. We hope that our project would eventually come available as a tool for programmers who are interested in knowing the cache behavior and memory reference characteristics of their programs, which could potentially be helpful in optimizing the code. 
+
+# Test and Analysis Framework
+We used the Contech tool by Prof. Brian Railing to generate taskgraphs of programs we wished to simulate. A taskgraph is a graph of tasks carried out by the program where each task is performed by one thread or core. Additionally, each task has a collection of memory reads and writes which is used by the simulator to simulate the behavior of a directory-based coherence scheme.
+The simulator takes as input the taskgraph of the program and generates as many contexts (rounded down to a power of 2 for simplicity) as in the taskgraph. As each task finishes, it assigns those successors of that task whose all ancestor tasks have finished to the assigned context. Once a task appears on a context’s taskQueue, the processor parses that task to form a queue of read/write operations. Then, operations from this queue are popped and executed whenever the previous operation finishes.
 
 # Design
 ![alt](https://docs.google.com/drawings/d/1oWQ2dwAXqiIF_LwauO9Iq_3m4PMCfL59P8XxDepZnBU/pub?w=960&h=720)
 ![alt](https://docs.google.com/drawings/d/1iTNpEl0jHeqUqQXSI_pWVDN4vZMKFxN3Tv4Kj3hHcTI/pub?w=960&h=720)
+
 ## Simulator
+
 ## Context
+Each context refers to a set of directory, cache, processor and protocol handler that work together and with other contexts to ensure coherence. The data structures pertaining to each context are contained in the context class and are accessed by the other parts (directory, cache etc) as and when needed. Notably, the incomingMsgQueue where other contexts enqueue their requests and replies is defined in the context class.
 
 ## Processor
 Processor is responsible for getting memory operations from a Task. It keeps a queue of MemoryAction objects that contain an address and an associated memory action type (e.g. a action_type_mem_read), and feeds the memory actions to protocol handler one at a time, and only when the previous memory action has finished. When the queue runs empty, the processor tries to fetch a new Task if one is available, and pre-processes the address of a memory action to be 64-byte aligned (which is the size of a cache line). In the case when a memory address spans two lines, processor will split that Memory Action into two, that have identical memory action types.
 
 ## Cache
 Our Cache supports configurable number of sets as well as associativity. Cache keeps a message queue and all messages are from local Protocol Handler, requesting to read a line, update (add/modify) a line, or invalidate a line. Cache will take request one by one, fulfill it, and ACK back to the Protocol Handler by adding to its incoming message queue. When eviction happens during an update, the Cache uses LRU policy to select a victim, and notify the Protocol Handler who could then change the cache line status accordingly.
-
 
 ## Directory
 
@@ -45,7 +52,6 @@ Another category of messages are those from home node that asks the protocol Han
 
 Finally, Protocol Handler could be getting messages from its local cache, in most cases an ACK for a cache action. For those messages, Protocol Handler either replies to home node with an ACK, or completes its current Memory Action (which means Processor could go ahead and fetch the next one), based on the specific type of that ACK message. 
 
-
 # Correctnest Test
 We tested the correctness for both MSI and MESI by creating a small sequence of memory operations for a number of processors. We sketched out the behaviors of each component as well as their communication that we expect to observe during each cycle, and then carefully verifies the result with our simulator output. 
 
@@ -57,6 +63,12 @@ The example mem op sequence and expected behavior of simulator for MSI can be fo
 
 This approach is useful in getting some basic correctness verified, but it's extremely non-scalable as the complexity grows fast with number of Memory Actions and number of Tasks. Therefore, we also used a lot of asserts to help us verify the state transitions of cache and directory entries are as expected. We have been able to run our simulation on some fairly large TaskGraphs without failing, and in the following section we will discuss some of our observations from running those traces.
 
+# Design Decisions 
+There were some interesting edge cases we had to consider to ensure our simulation results in a coherent state of a cacheline. 
+## Rollback
+When the home node receives an INVALIADTE_OTHER for a cache line that is not in SHARED_STATE, this implies that some other context was granted this line in a non - shared state just this cycle. The home node then needs to notify the requester node of this second INVALIDATE_OTHER that it no longer can respond to this message and that the requester needs to modify its request to a WRITE_MISS and resend. Thus, the home node sends the requester a ROLLBACK message. Upon, receiving a ROLLBACK, the requester node stashes it current request and sends a modified request for the current memory operation.
+## Home Node Is Also The Owner
+When the home node is the also the owner of the line in a modified/exclusive state or the sharer of the line, we had to make sure that we do not send out one more or one less invalidation. In order to prevent deadlocking and promote code clarity, we decoupled the invalidation messages into two types - one a context sends out as a requester to home node - INVALIDATE_OTHER and one the home node sends out to other contexts (maybe including itself) to invalidate their copy of the cache line - INVALIDATE.
 
 # Analysis
 ## TestAndSet vs Test-TestAndSet 
