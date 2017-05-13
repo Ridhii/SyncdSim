@@ -1,13 +1,16 @@
 theme: jekyll-theme-cayman
 
 # Name of your blog (this will show up at the top of your page and in the RSS feed)
-name: SyncSim
+title: SyncdSim
 
 # Short description (goes below the title; it will also be used in the RSS feed)
 description: Be coherent, be cool.
 
 # Your name, as you want it to appear underneath each post and in the footer
-author: Yinyi Chen  Ridhi Surana
-
-# Your email if you want it to be linked on the contact page
-author_email: yinyic@andrew.cmu.edu   rsurana@andrew.cmu.edu
+author:
+  name:       Yinyi Chen
+  url:        yinyic@andrew.cmu.edu
+  
+author:
+  name:       Ridhi Surana
+  url:        rsurana@andrew.cmu.edu
