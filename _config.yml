@@ -1,13 +1,10 @@
 theme: jekyll-theme-cayman
 
-
 # Setup
 title:        SyncdSim
 tagline:      A responsive theme for your project on GitHub Pages
 baseurl:      ""
 paginate:     1
-
-# Short description (goes below the title; it will also be used in the RSS feed)
 description: Be coherent, be cool.
 
 # Your name, as you want it to appear underneath each post and in the footer
@@ -18,3 +15,11 @@ author:
 author:
   name:       Ridhi Surana
   url:        rsurana@andrew.cmu.edu
+
+
+# Gems
+gems:
+  - jekyll-paginate
+
+#Others
+markdown: kramdown
