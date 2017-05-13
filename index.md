@@ -15,6 +15,7 @@ The simulator takes as input the taskgraph of the program and generates as many 
 ![alt](https://docs.google.com/drawings/d/1iTNpEl0jHeqUqQXSI_pWVDN4vZMKFxN3Tv4Kj3hHcTI/pub?w=960&h=720)
 
 ## Simulator
+The simulator receives the taskgraph file and protocol type as specified by the user as its input. The first thing it does is that it retrieves the number of contexts from the taskgraph and rounds it down to a power of 2 for simplicity’s sake and creates that many context objects. Additionally, parses the taskgraph using the contech framework and assigns the first task to its context. Each cycle, it pulls out the finished tasks from each context's’ queue and assigns those successors of that task whose all ancestors have finished to their assigned context.
 
 ## Context
 Each context refers to a set of directory, cache, processor and protocol handler that work together and with other contexts to ensure coherence. The data structures pertaining to each context are contained in the context class and are accessed by the other parts (directory, cache etc) as and when needed. Notably, the incomingMsgQueue where other contexts enqueue their requests and replies is defined in the context class.
