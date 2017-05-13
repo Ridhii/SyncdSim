@@ -100,6 +100,15 @@ public:
 	void incEStateCount();
 	void incMStateCount();
 	void reAddCurrMemOp();
+
+	int getCacheHit();
+   	int getCacheMiss();
+   	/* count of numMsgs sent to other nodes */
+   	int getNumSentMsgs();
+   	int getNumSentMsgsToCache();
+   	int getNumInvalidationsSent();
+   	int getEStateCount();
+   	int getMStateCount();
 };
 
 

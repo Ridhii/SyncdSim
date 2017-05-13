@@ -35,23 +35,23 @@ int main(int argc, char** argv)
     /* we expect 4 input args, taskGraph file, protocolType,
        node and cache latency
     */
-    printf("argc = %d and argv[1] = %s\n", argc, argv[1]);
+    // printf("argc = %d and argv[1] = %s\n", argc, argv[1]);
     if (argc == 5)
     {   
         /* max length of string is 5, should change as more protocols are added!!*/
         if(std::strncmp(argv[2],"MSI", 5) == 0){
-            cout << "protocol == MSI\n";
+            cout << "protocol: MSI\n";
             protocol = protocolType::MSI; //argv[2]
 
         }
         else{
-            cout << "protocol == MESI\n";
+            cout << "protocol: MESI\n";
             protocol = protocolType::MESI;
         }
         nodeLatency  = std::atoi(argv[3]);
         cacheLatency = std::atoi(argv[4]);
         #ifdef DEBUG
-        printf("taskGraph is %s, node latency is %d and cache latency is %d and ITER_CAP is %d\n", argv[0], nodeLatency, cacheLatency, ITER_CAP);
+        printf("taskGraph: %s\nnode latency: %d\ncache latency: %d\n", argv[0], nodeLatency, cacheLatency);
         #endif
         Simulator simulator = Simulator(argv[1], protocol);
         simulator.run();

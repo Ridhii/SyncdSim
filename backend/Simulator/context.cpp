@@ -173,11 +173,43 @@ void Context::incMStateCount(){
 
 }
 
+
+int Context::getCacheHit() {
+	return cacheHit;
+}
+
+int Context::getCacheMiss() {
+	return cacheMiss;
+}
+   	/* count of numMsgs sent to other nodes */
+int Context::getNumSentMsgs() {
+	return numSentMsgs;
+}
+
+int Context::getNumSentMsgsToCache() {
+	return numSentMsgsToCache;
+}
+
+int Context::getNumInvalidationsSent() {
+	return numInvalidationsSent;
+}
+int Context::getEStateCount() {
+	return EStateCount;
+}
+
+int Context::getMStateCount() {
+	return MStateCount;
+}
+
+
+
+
 void Context::printContextStats(){
-	printf("***** CONTEXT ID %d *****\n", contextId);
-	printf(" CacheHits = %d CacheMisses = %d, numSentMsgs = %d, numInvalidationsSent = %d numSentMsgsToCache = %d ", cacheHit, cacheMiss, numSentMsgs, numInvalidationsSent, numSentMsgsToCache);
+	printf("============================\n CONTEXT ID %d \n============================\n", contextId);
+	printf("CacheHits = %d \nCacheMisses = %d \nnumSentMsgs = %d \nnumInvalidationsSent = %d \nnumSentMsgsToCache = %d \n", 
+		cacheHit, cacheMiss, numSentMsgs, numInvalidationsSent, numSentMsgsToCache);
 	if(protocol == protocolType::MESI){
-		printf("EStateCount = %d ", EStateCount);
+		printf("EStateCount = %d\n", EStateCount);
 	}
 	printf("MStateCount = %d\n", MStateCount);
 

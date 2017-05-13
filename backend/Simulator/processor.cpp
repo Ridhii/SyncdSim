@@ -38,7 +38,7 @@ void Processor::populateMemActionQueue(){
         	break;
         }
     }
-    cout << "number of memOps for currTask in context " << myContext->getContextId() << "is " << index << "\n";
+    // cout << "number of memOps for currTask in context " << myContext->getContextId() << "is " << index << "\n";
 }
 
 void Processor::reAddCurrMemOp(uint64_t addr, contech::action_type type){
@@ -64,7 +64,7 @@ void Processor::run(){
 		}
 		else{
 			if(currTask != NULL){
-				cout << " ******** CONTEXT " << myContext->getContextId() << " FINISHES IT'S TASK ********\n";
+				// cout << " ******** CONTEXT " << myContext->getContextId() << " FINISHES IT'S TASK ********\n";
 				myContext->addCompletedTask(currTask);
 				currTask = NULL;
 
@@ -76,7 +76,7 @@ void Processor::run(){
 				populateMemActionQueue();
 				//if(numTasksLeft == 39) cout << "populateMemActionQueue returns \n";
 				taskStarted += 1;
-				cout << " ******** TASK " << taskStarted << " STARTS IN CONTEXT" << myContext->getContextId() << " ******** \n";
+				// cout << " ******** TASK " << taskStarted << " STARTS IN CONTEXT" << myContext->getContextId() << " ******** \n";
 				continue;
 
 			}

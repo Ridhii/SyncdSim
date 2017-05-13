@@ -4,19 +4,10 @@ int numTasksLeft;
 
 Simulator::Simulator(char* f, protocolType protocol){
 	cycleCount = 0;
-	printf("initialize a simulator\n");
+	// printf("initialize a simulator\n");
 	tg = contech::TaskGraph::initFromFile(f);
 	numContexts = tg -> getNumberOfContexts();
 	numContexts = pow(2, floor(log(numContexts)/log(2))); // round down to nearest power of 2
-   
-
-
-
-    /*==============================BASIC TEST STUFF==============================*/
-    //numContexts = 4;
-
-
-
 
     #ifdef DEBUG
 	printf("Number of rounded contexts is %d \n", numContexts);
@@ -40,33 +31,17 @@ Simulator::Simulator(char* f, protocolType protocol){
 	// mod cid 
 	cid = cid % numContexts;
 	contexts[cid]->addToTaskQueue(firstTask);
-	
-
-
-
-	/*============================== BASIC TEST STUFF ==============================*/
-
-	// contexts[0]->addToTaskQueue(firstTask);
-	// contexts[1]->addToTaskQueue(firstTask);
-	// contexts[2]->addToTaskQueue(firstTask);
-	// contexts[3]->addToTaskQueue(firstTask);
-
-
-
-
-
-	printf("Simulator created\n");
-
 }
 
 void Simulator::run(){
 	/* changed this from != 0 in case we reach negative num of unfinished tasks, although that shouldn't 
 	   happen
 	*/
+	printf("***** Simulation started *****\n");
 	while (numUnfinishedTasks > 0) {
 		cycleCount ++;
-		printf("--------------- Cycle Count %d -------------------------\n", cycleCount);
-		printf("------------------------------------------------------\n");
+		// printf("--------------- Cycle Count %d -------------------------\n", cycleCount);
+		// printf("------------------------------------------------------\n");
 		// run all processors and protocolHandlers
 		for (Context* c : contexts){
 			c->run();
@@ -74,7 +49,7 @@ void Simulator::run(){
 			for (contech::Task* t : c->getCompletedTasks()){
 				numUnfinishedTasks --;
 				numTasksLeft --;
-				printf("******* TASK FINISHED, LEFT %d ********\n", numUnfinishedTasks);
+				// printf("******* TASK FINISHED, LEFT %d ********\n", numUnfinishedTasks);
 				std::vector<contech::TaskId> successors = t -> getSuccessorTasks();
 				if (successors.size() != 0) {
 					contech::TaskId predecessorTid = t -> getTaskId();
@@ -126,8 +101,36 @@ void Simulator::run(){
 
 void Simulator::printResult(){
 	
-	printf("Simulation has completed\n");
-	
+	printf("***** Simulation has completed *****\n");
+	printf("Total Cycle: %d\n", cycleCount);
+
+	int totalCacheHit = 0;
+   	int totalCacheMiss = 0;
+   	/* count of numMsgs sent to other nodes */
+   	int totalNumSentMsgs = 0;
+   	int totalNumSentMsgsToCache = 0;
+   	int totalNumInvalidationsSent = 0;
+   	int totalEStateCount = 0;
+   	int totalMStateCount = 0;
+
+	for (int i = 0; i < numContexts; ++i){
+		totalCacheHit += contexts[i] -> getCacheHit();
+		totalCacheMiss += contexts[i] -> getCacheMiss();
+		totalNumSentMsgs += contexts[i] -> getNumSentMsgs();
+		totalNumSentMsgsToCache += contexts[i] -> getNumSentMsgsToCache();
+		totalNumInvalidationsSent += contexts[i] -> getNumInvalidationsSent();
+		totalEStateCount += contexts[i] -> getEStateCount();
+		totalMStateCount += contexts[i] -> getMStateCount();
+	}
+	printf("Cache Hit: %d\n", totalCacheHit);
+	printf("Cache Miss: %d\n", totalCacheMiss);
+	printf("Context Messages: %d\n", totalNumSentMsgs);
+	printf("Cache Messages: %d\n", totalNumSentMsgsToCache);
+	printf("Invalidation Messages: %d\n", totalNumInvalidationsSent);
+	printf("Number of times write to a line in Exclusive state: %d\n", totalEStateCount);
+	printf("Number of times write to a line in Modified state: %d\n", totalMStateCount);
+
+
 	for (int i = 0; i < numContexts; ++i){
 		contexts[i]->printContextStats();
 	}
