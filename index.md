@@ -2,6 +2,7 @@
 SyncdSim is a directory-based cache coherence simulator that supports MSI and MESI (more to come). It takes in memory reference traces, simulates cache and directory traffic, and finally analyzes/reports the behaviors. 
 
 [Proposal](https://docs.google.com/document/d/1QY9NSylgeijPDd_o8aU2cFlw5tOzJ3V-_C7QCZR_JTE/edit?usp=sharing) 
+
 [Checkpoint](https://github.com/Ridhii/SyncdSim/blob/master/backend/Simulator/CheckpointReport.pdf) 
 
 # Background
