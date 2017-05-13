@@ -6,7 +6,7 @@ Syncdsim is a directory-based cache coherence simulator that supports MSI and ME
 Cache coherence is one of the most important topics in designing multi-processor caches. In the lectures, we discussed both snooping-based and directory-based cache coherence protocols. Comparing to snooping-based which relies heavily on broadcasting on the entire bus, directory-based protocols seems to be more scalable with regard to number of processors as it allows point-to-point communication. Therefore, we decide to develop a deeper understanding of the various directory-based cache coherence protocols by actually implementing them and observe cache behavior of programs with distinct memory traces. We hope that our project would eventually come available as a tool for programmers who are interested in knowing the cache behavior and memory reference characteristics of their programs, which could potentially be helpful in optimizing the code. 
 
 # Design
-![alt](https://github.com/Ridhii/SyncdSim/blob/master/backend/Simulator/architecture.png)
+![alt](https://docs.google.com/drawings/d/1oWQ2dwAXqiIF_LwauO9Iq_3m4PMCfL59P8XxDepZnBU/pub?w=960&h=720)
 ![alt](https://github.com/Ridhii/SyncdSim/blob/master/backend/Simulator/message_sequence.png)
 ## Simulator
 ## Context
