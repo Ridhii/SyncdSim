@@ -9,14 +9,8 @@ description: Be coherent, be cool.
 show_downloads: "true"
 
 # Your name, as you want it to appear underneath each post and in the footer
-author:
-  name:       Yinyi Chen
-  url:        yinyic@andrew.cmu.edu
-  
-author:
-  name:       Ridhi Surana
-  url:        rsurana@andrew.cmu.edu
-
+author:       Yinyi Chen
+author:       Ridhi Surana
 
 # Gems
 gems:
