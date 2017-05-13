@@ -6,6 +6,8 @@ Syncdsim is a directory-based cache coherence simulator that supports MSI and ME
 Cache coherence is one of the most important topics in designing multi-processor caches. In the lectures, we discussed both snooping-based and directory-based cache coherence protocols. Comparing to snooping-based which relies heavily on broadcasting on the entire bus, directory-based protocols seems to be more scalable with regard to number of processors as it allows point-to-point communication. Therefore, we decide to develop a deeper understanding of the various directory-based cache coherence protocols by actually implementing them and observe cache behavior of programs with distinct memory traces. We hope that our project would eventually come available as a tool for programmers who are interested in knowing the cache behavior and memory reference characteristics of their programs, which could potentially be helpful in optimizing the code. 
 
 # Design
+![alt](https://github.com/Ridhii/SyncdSim/blob/master/backend/Simulator/architecture.png)
+![alt](https://github.com/Ridhii/SyncdSim/blob/master/backend/Simulator/message_sequence.png)
 ## Simulator
 ## Context
 
@@ -13,6 +15,8 @@ Cache coherence is one of the most important topics in designing multi-processor
 Processor is responsible for getting memory operations from a Task. It keeps a queue of MemoryAction objects that contain an address and an associated memory action type (e.g. a action_type_mem_read), and feeds the memory actions to protocol handler one at a time, and only when the previous memory action has finished. When the queue runs empty, the processor tries to fetch a new Task if one is available, and pre-processes the address of a memory action to be 64-byte aligned (which is the size of a cache line). In the case when a memory address spans two lines, processor will split that Memory Action into two, that have identical memory action types.
 
 ## Cache
+Our Cache supports configurable number of sets as well as associativity. Cache keeps a message queue and all messages are from local Protocol Handler, requesting to read a line, update (add/modify) a line, or invalidate a line. Cache will take request one by one, fulfill it, and ACK back to the Protocol Handler by adding to its incoming message queue. When eviction happens during an update, the Cache uses LRU policy to select a victim, and notify the Protocol Handler who could then change the cache line status accordingly.
+
 
 ## Directory
 
@@ -43,20 +47,19 @@ Finally, Protocol Handler could be getting messages from its local cache, in mos
 
 
 # Correctnest Test
-## Basic correctness
 We tested the correctness for both MSI and MESI by creating a small sequence of memory operations for a number of processors. We sketched out the behaviors of each component as well as their communication that we expect to observe during each cycle, and then carefully verifies the result with our simulator output. 
 
 Since our project is designed to take in a taskGraph file and parse the taskGraph for assigning tasks(groups of mem ops) to each processor, we had to do a bit of hacking to "inject" our mem ops into an existing taskGraph, that is to replace the original mem ops in the graph with our own ops. 
 
-This approach is useful in getting some basic correctness verified, but it's extremely non-scalable as the complexity grows fast with number of mem ops.
-
 The example mem op sequence and expected behavior of simulator for MESI can be found [here]( https://docs.google.com/a/andrew.cmu.edu/document/d/1DDc1RicXqDVquXbJmqvOqBLhzjSF1iNKCU6ISPp7JIg/edit?usp=sharing)
 
-The example mem op sequence and expected behavior of simulator for MESI can be found [here]( https://docs.google.com/document/d/1j2hKFtNprdb43laDmoDHZk0d-TV_UeslHpxe_8zuYuM/edit?usp=sharing)
+The example mem op sequence and expected behavior of simulator for MSI can be found [here]( https://docs.google.com/document/d/1j2hKFtNprdb43laDmoDHZk0d-TV_UeslHpxe_8zuYuM/edit?usp=sharing)
+
+This approach is useful in getting some basic correctness verified, but it's extremely non-scalable as the complexity grows fast with number of Memory Actions and number of Tasks. Therefore, we also used a lot of asserts to help us verify the state transitions of cache and directory entries are as expected. We have been able to run our simulation on some fairly large TaskGraphs without failing, and in the following section we will discuss some of our observations from running those traces.
 
 
 # Analysis
-TestAndSet vs Test-TestAndSet 
+## TestAndSet vs Test-TestAndSet 
 
 The following chart represents information about the statistics we collected for taskGraphs that represented programs we wrote that represented test and set and test - test and set schemes.
 ![alt](https://github.com/Ridhii/SyncdSim/blob/master/backend/Simulator/Images/tasVsttas.png)
@@ -83,7 +86,50 @@ Number of writes in a modified state : For test and set, context 0 and context 3
 Test - test and set has zero writes to a line in a modified state as the contexts either read to a line in a shared state and when the lock holder unlocks the lock and invalidates the line, the next holder of the line gets the line in a modified state and immediately writes to it and finishes the task. Thus, the contexts in test - test and set never issue an intention to write and fail in doing so - they either read the line in a shared state or when the line is invalidated, load and write to it and then finish while the rest of the contexts have the line in an invalid state.
 
 
+## Splash
+Below is a total count for differernt stats collected from running Splash taskgraph with MSI and MESI:
+
+|                          | MSI    | MESI   |
+|--------------------------|--------|--------|
+| Total Cycle              | 304724 | 304434 |
+| Cache Hit                | 294740 | 294740 |
+| Cache Miss               | 4597   | 4597   |
+| Context Messages         | 11623  | 13775  |
+| Cache Messages           | 4885   | 4597   |
+| Invalidation Messages    | 288    | 0      |
+| Write to line in E state | 0      | 288    |
+| Write to line in M state | 123056 | 123056 |
+
+
+Note that, "Invalidation Messages" here refer to number of "INVALIDATE_OTHER" messages, and that is the message a node would send to home node if it would like to write to a line and figures that the current cache status is SHARED (hence it requests the home node to invalidate everyone else who has the line).
+
+We can see that with MESI state, there is 0 invalidation messages, which makes perfect sense because in MESI, Protocol Handler will simply write to the line in "EXCLUSIVE" state and promote itself to "MODIFIED", without the need to notify the home node. However, there's an increase in total number of messages sent among contexts. An explanation would be that, the home node will now have to treat an "EXCLUSIVE" line as if it's "MODIFIED" because it has no knowledge whether the owner has written to it or not. Therefore in MESI, the home node ends up sending INVALIDATE_FETCH to those exclusive owners when it gets a READ_MISS from someone, while in MSI when a line is in "SHARED" state, the home node can directly reply to a READ_MISS without invalidating the sharers.
 
 
 
-# Conclusion
+## BlackScholes
+Below is a total count for differernt stats collected from running BlackScholes taskgraph with MSI and MESI:
+
+|                          | MSI    | MESI   |
+|--------------------------|--------|--------|
+| Total Cycle              | 62998  | 62997  |
+| Cache Hit                | 165042 | 165042 |
+| Cache Miss               | 30001  | 30001  |
+| Context Messages         | 60076  | 88602  |
+| Cache Messages           | 30011  | 30010  |
+| Invalidation Messages    | 3      | 2      |
+| Write to line in E state | 0      | 1      |
+| Write to line in M state | 10680  | 10680  |
+
+For this task graph, there really isn't that much of difference in simulation result whether running with MSI or MESI. The fact that MESI is not particularly useful for this task graph suggests some characteristics about it. Specifically, the task graph must be:
+
++ having very few READ followed by WRITE. Otherwise, since the first reader enters EXCLUSIVE, its subsequent WRITEs to the line will be write hits.  Or, 
+
++ having a lot of contending readers, which implies that the line is most likely be in SHARED state rather than owned by someone exclusively
+
+
+
+# Reference
+[Contech Refernce Framework](https://github.com/bprail/contech) 
+
+John L. Hennessy, David A. Patterson *Computer Architecture: A Quantative Approach*
