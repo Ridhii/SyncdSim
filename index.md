@@ -64,8 +64,8 @@ Same argument is applied to cacheMiss. Here comes the interesting part - EStateC
 TestAndSet vs Test-TestAndSet 
 
 The following chart represents information about the statistics we collected for taskGraphs that represented programs we wrote that represented test and set and test - test and set schemes.
-![alt](backend/Simulator/Images/tas\ vs\ ttas.png)
-![alt](backend/Simulator/Images/short tas.png)
+![alt](backend/Simulator/Images/tasVsttas.png)
+![alt](backend/Simulator/Images/shortTas.png)
 ![alt](backend/Simulator/Images/ttas.png)
 
 Clarification on the x-axis labels : 
