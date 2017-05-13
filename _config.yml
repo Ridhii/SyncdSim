@@ -6,6 +6,7 @@ tagline:      A responsive theme for your project on GitHub Pages
 baseurl:      ""
 paginate:     1
 description: Be coherent, be cool.
+show_downloads: "true"
 
 # Your name, as you want it to appear underneath each post and in the footer
 author:
