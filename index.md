@@ -1,5 +1,7 @@
 # Overview
 SyncdSim is a directory-based cache coherence simulator that supports MSI and MESI (more to come). It takes in memory reference traces, simulates cache and directory traffic, and finally analyzes/reports the behaviors. 
+[Proposal](https://docs.google.com/document/d/1QY9NSylgeijPDd_o8aU2cFlw5tOzJ3V-_C7QCZR_JTE/edit?usp=sharing) 
+[Checkpoint](https://github.com/Ridhii/SyncdSim/blob/master/backend/Simulator/CheckpointReport.pdf) 
 
 # Background
 A Directory-Based Cache Coherence Scheme solves the cache coherence problem in Distributed Shared Memory or NUMA systems. Each core is connected to a directory that keeps track of state of cache lines in the core's’ local memory vs using a bus as in a snooping based scheme. It’s biggest strength is that it is highly scalable as cores only talk to cores they are interested in instead of broadcasting the message across the entire interconnect.
