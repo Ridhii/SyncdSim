@@ -31,7 +31,7 @@ Protocol Handler maintain a map that stores the current state of a line in its o
 | SHARED            | WRITE         | INVALIDATE_OTHER | ask the home node to invalidate all other sharers |
 | INVALID           | READ          | READ_MISS        | ask the home node for a line to read              |
 | INVALID           | WRITE         | WRITE_MISS       | ask the home node for a line to write             |
-
+|-------------------|---------------|------------------|---------------------------------------------------|
 
 
 2. Service a message from its incoming message queue
