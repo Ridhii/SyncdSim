@@ -64,7 +64,9 @@ Same argument is applied to cacheMiss. Here comes the interesting part - EStateC
 TestAndSet vs Test-TestAndSet 
 
 The following chart represents information about the statistics we collected for taskGraphs that represented programs we wrote that represented test and set and test - test and set schemes.
-<p align="center"> ![alt](backend/Simulator/Images/tasVsttas.png) </p>
+<p align="center"> 
+<img src="https://github.com/Ridhii/SyncdSim/blob/master/backend/Simulator/Images/tasVsttas.png">
+</p>
 
 Clarification on the x-axis labels : 
 #msg sent to other nodes - represents the number of times a context sent a message to another context to request a certain service (like service a READ_MISS etc). 
