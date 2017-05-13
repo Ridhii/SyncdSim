@@ -37,7 +37,7 @@ Our Cache supports configurable number of sets as well as associativity. Cache k
 ## Protocol Handler
 Protocol Handler knows well about the protocol and its state transitions. It talks to Directory, Cache, and other nodes in order to service a MemoryAction from its own processor, or a message from its incoming message queue. 
 
-1. Service a MemoryAction from its own processor
++ Service a MemoryAction from its own processor
 
 Protocol Handler maintain a map that stores the current state of a line in its own cache. The state could be "MODIFIED", "SHARED", or "INVALID" if the protocol is MSI, with an extra "EXCLUSIVE" state in MESI. To service a MemoryAction, it checks to see the current state of the line, and decides whether it could just read from/write to its own Cache, or it actually has to communicate with the home node. If latter, it will choose the message type based on the current protocol being used. For cache-related messages, Protocol Handler adds the message to the message queue of local cache. For other messages, it puts the message on other Context's incoming message queue. As an example, in *MSI*, the correct message type for all combinations would look like:
 
@@ -52,7 +52,7 @@ Protocol Handler maintain a map that stores the current state of a line in its o
 
 
 
-2. Service a message from its incoming message queue
++ Service a message from its incoming message queue
 
 Each cycle, a Protocol Handler will check its incoming queue for serviceable messages, and reacts accordingly. If the message has type INVALIDATE_OTHER, READ_MISS, or WRITE_MISS, then it's possible that another message with regard to the same memory address is currently being serviced. In that case, the later message could not be serviced right away, hence will be put in to a blocked message queue for that address. If the message is serviceable, Protocol Handler will check whether it could reply immediately, or it needs to relay it to owners/sharers of the line.
 
@@ -153,8 +153,11 @@ For this task graph, there really isn't that much of difference in simulation re
 + having a lot of contending readers, which implies that the line is most likely be in SHARED state rather than owned by someone exclusively
 
 # Authors
-Yinyi Chen      yinyic@andrew.cmu.edu
-Ridhi Surana    rsurana@andrew.cmu.edu
+Yinyi Chen      
+yinyic@andrew.cmu.edu
+
+Ridhi Surana    
+rsurana@andrew.cmu.edu
 
 equal work was performed by both project members
 
