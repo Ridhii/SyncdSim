@@ -64,6 +64,10 @@ Same argument is applied to cacheMiss. Here comes the interesting part - EStateC
 TestAndSet vs Test-TestAndSet 
 
 The following chart represents information about the statistics we collected for taskGraphs that represented programs we wrote that represented test and set and test - test and set schemes.
+![alt](backend/Simulator/Images/tas\ vs\ ttas.png)
+![alt](backend/Simulator/Images/short tas.png)
+![alt](backend/Simulator/Images/ttas.png)
+
 Clarification on the x-axis labels : 
 #msg sent to other nodes - represents the number of times a context sent a message to another context to request a certain service (like service a READ_MISS etc). 
 #write to E represents the total number of times the contexts wrote to a line in an Exclusive state and #write to M represents the total number of times all the contexts wrote to a line in a Modified state.
