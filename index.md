@@ -7,7 +7,7 @@ Cache coherence is one of the most important topics in designing multi-processor
 
 # Design
 ![alt](https://docs.google.com/drawings/d/1oWQ2dwAXqiIF_LwauO9Iq_3m4PMCfL59P8XxDepZnBU/pub?w=960&h=720)
-![alt](https://github.com/Ridhii/SyncdSim/blob/master/backend/Simulator/message_sequence.png)
+![alt](https://docs.google.com/drawings/d/1iTNpEl0jHeqUqQXSI_pWVDN4vZMKFxN3Tv4Kj3hHcTI/pub?w=960&h=720)
 ## Simulator
 ## Context
 
