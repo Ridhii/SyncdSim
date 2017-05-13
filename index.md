@@ -56,11 +56,6 @@ The example mem op sequence and expected behavior of simulator for MESI can be f
 
 
 # Analysis
-For the analysis we ran a small taskGraph with memOps per task capped at 5 (to be able to finish quickly). However, the analyzation can be extended to any number of memOps per task. Here we see that cacheHits and cacheMisses for both MSI and MESI remain same as irrespective of the fact that a line is found in an exclusive state or modified state in MESI during a write it's still a cacheHit. The other conditions of cacheHit remain same across MSI and MESI and hence this count is same.
-Same argument is applied to cacheMiss. Here comes the interesting part - EStateCount represents the number of times a line is found in exclusive state. That is 1 for this file in MESI count and subsequently numInvalidations sent out is 1 less in MESI as the node does not send out invalidates for a write to exclusive state. Whereas the same line was in a Modified state in MSI and an invalidate was sent out for it. Number of messages sent to other nodes by a node is more in MESI protocol as a home node sends out a FETCH to a node containing a line in E state when another node sends a READ_MISS as the node holding the line in E state might have written to it. However, when a node sends a READ_MISS for a line that is in Shared state, the home node does not send any messages to any of the sharers as the line has not been modified since last written. This is not guaranteed when a node holds a line in E state in MESI (it might have migrated to M). As for the messages sent to cache, that increases in MESI because we send out a CACHE_FETCH when we get a request to FETCH a line that is held in an E state in MESI from the home node of that line upon receiving a READ_MISS from another node.
-
-![alt](backend/Simulator/Images/blackscholes.png)
-
 TestAndSet vs Test-TestAndSet 
 
 The following chart represents information about the statistics we collected for taskGraphs that represented programs we wrote that represented test and set and test - test and set schemes.
@@ -69,10 +64,10 @@ The following chart represents information about the statistics we collected for
 </p>
 
 Clarification on the x-axis labels : 
+
 #msg sent to other nodes - represents the number of times a context sent a message to another context to request a certain service (like service a READ_MISS etc). 
 #write to E represents the total number of times the contexts wrote to a line in an Exclusive state and #write to M represents the total number of times all the contexts wrote to a line in a Modified state.
 #invalidations sent means the total number of times all the contexts wrote to a line in a shared state and sent the home node an invalidation request.
-
 
 The simulator takes in the taskgraphs generated for the test and set and test-test and set programs and simulates the memory operations in each task in a task dependent order. The following are the taskgraphs for test and set and test-test and set and will help understand the above graph better. 
 
