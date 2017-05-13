@@ -41,8 +41,6 @@ Another category of messages are those from home node that asks the protocol Han
 
 Finally, Protocol Handler could be getting messages from its local cache, in most cases an ACK for a cache action. For those messages, Protocol Handler either replies to home node with an ACK, or completes its current Memory Action (which means Processor could go ahead and fetch the next one), based on the specific type of that ACK message. 
 
-### MSI Handler
-### MESI Handler
 
 # Correctnest Test
 ## Basic correctness
