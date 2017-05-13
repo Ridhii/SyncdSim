@@ -51,6 +51,7 @@ Protocol Handler maintain a map that stores the current state of a line in its o
 | INVALID           | WRITE         | WRITE_MISS       | ask the home node for a line to write             |
 
 
+
 2. Service a message from its incoming message queue
 
 Each cycle, a Protocol Handler will check its incoming queue for serviceable messages, and reacts accordingly. If the message has type INVALIDATE_OTHER, READ_MISS, or WRITE_MISS, then it's possible that another message with regard to the same memory address is currently being serviced. In that case, the later message could not be serviced right away, hence will be put in to a blocked message queue for that address. If the message is serviceable, Protocol Handler will check whether it could reply immediately, or it needs to relay it to owners/sharers of the line.
@@ -151,7 +152,11 @@ For this task graph, there really isn't that much of difference in simulation re
 
 + having a lot of contending readers, which implies that the line is most likely be in SHARED state rather than owned by someone exclusively
 
+# Authors
+Yinyi Chen      yinyic@andrew.cmu.edu
+Ridhi Surana    rsurana@andrew.cmu.edu
 
+equal work was performed by both project members
 
 # Reference
 [Contech Refernce Framework](https://github.com/bprail/contech) 
